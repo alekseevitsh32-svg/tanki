@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Редактор блоков танка</title>
+    <title>Редактор танка - tank_1</title>
     <style>
         * {
             margin: 0;
@@ -24,7 +24,6 @@
             height: 100vh;
         }
         
-        /* 3D сцена */
         #viewport {
             flex: 1;
             position: relative;
@@ -38,17 +37,16 @@
             height: 100% !important;
         }
         
-        /* Информация о выделенном объекте */
         #selectionInfo {
             position: absolute;
             bottom: 20px;
             left: 20px;
             background: rgba(0,0,0,0.8);
-            padding: 12px 20px;
+            padding: 10px 18px;
             border-radius: 10px;
             border-left: 3px solid #ffaa00;
             pointer-events: none;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             backdrop-filter: blur(4px);
         }
         
@@ -57,9 +55,8 @@
             font-weight: bold;
         }
         
-        /* Панель инструментов */
         #toolbar {
-            width: 320px;
+            width: 340px;
             background: rgba(20, 20, 40, 0.95);
             backdrop-filter: blur(10px);
             border-left: 2px solid #2a2a4a;
@@ -67,17 +64,15 @@
             overflow-y: auto;
             display: flex;
             flex-direction: column;
-            gap: 16px;
+            gap: 12px;
         }
         
         #toolbar::-webkit-scrollbar {
             width: 6px;
         }
-        
         #toolbar::-webkit-scrollbar-track {
             background: rgba(0,0,0,0.2);
         }
-        
         #toolbar::-webkit-scrollbar-thumb {
             background: #ffaa00;
             border-radius: 3px;
@@ -97,39 +92,39 @@
         .section {
             background: rgba(255,255,255,0.03);
             border-radius: 10px;
-            padding: 14px;
+            padding: 12px;
             border: 1px solid rgba(255,255,255,0.05);
         }
         
         .section-title {
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             text-transform: uppercase;
             color: #8888aa;
             letter-spacing: 1px;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             font-weight: 600;
         }
         
         .btn-group {
             display: flex;
-            gap: 8px;
+            gap: 6px;
             flex-wrap: wrap;
         }
         
         .btn {
-            padding: 8px 16px;
+            padding: 6px 14px;
             border: none;
-            border-radius: 8px;
+            border-radius: 6px;
             cursor: pointer;
-            font-size: 0.9rem;
+            font-size: 0.8rem;
             font-weight: 600;
             transition: all 0.2s ease;
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 5px;
             flex: 1;
             justify-content: center;
-            min-width: 60px;
+            min-width: 50px;
         }
         
         .btn:hover {
@@ -141,66 +136,47 @@
             transform: scale(0.95);
         }
         
-        .btn-primary {
-            background: #ffaa00;
-            color: #0a0a1a;
-        }
-        
-        .btn-primary:hover {
-            background: #ffbb22;
-        }
-        
-        .btn-danger {
-            background: #cc3344;
-            color: white;
-        }
-        
-        .btn-danger:hover {
-            background: #dd4455;
-        }
-        
         .btn-success {
             background: #2d8a4e;
             color: white;
         }
-        
         .btn-success:hover {
             background: #3a9a5e;
         }
-        
+        .btn-danger {
+            background: #cc3344;
+            color: white;
+        }
+        .btn-danger:hover {
+            background: #dd4455;
+        }
+        .btn-primary {
+            background: #ffaa00;
+            color: #0a0a1a;
+        }
+        .btn-primary:hover {
+            background: #ffbb22;
+        }
         .btn-secondary {
             background: rgba(255,255,255,0.1);
             color: #aaa;
             border: 1px solid rgba(255,255,255,0.1);
         }
-        
         .btn-secondary:hover {
             background: rgba(255,255,255,0.15);
             color: white;
         }
         
-        .btn-outline {
-            background: transparent;
-            color: #ffaa00;
-            border: 2px solid #ffaa00;
-        }
-        
-        .btn-outline:hover {
-            background: #ffaa00;
-            color: #0a0a1a;
-        }
-        
-        /* Слайдеры */
         .slider-group {
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 8px;
         }
         
         .slider-item {
             display: flex;
             flex-direction: column;
-            gap: 4px;
+            gap: 3px;
         }
         
         .slider-item label {
@@ -217,7 +193,7 @@
         
         input[type="range"] {
             width: 100%;
-            height: 6px;
+            height: 5px;
             -webkit-appearance: none;
             appearance: none;
             background: #2a2a4a;
@@ -228,8 +204,8 @@
         input[type="range"]::-webkit-slider-thumb {
             -webkit-appearance: none;
             appearance: none;
-            width: 16px;
-            height: 16px;
+            width: 14px;
+            height: 14px;
             border-radius: 50%;
             background: #ffaa00;
             cursor: pointer;
@@ -237,8 +213,8 @@
         }
         
         input[type="range"]::-moz-range-thumb {
-            width: 16px;
-            height: 16px;
+            width: 14px;
+            height: 14px;
             border-radius: 50%;
             background: #ffaa00;
             cursor: pointer;
@@ -252,10 +228,10 @@
         }
         
         .color-picker input[type="color"] {
-            width: 40px;
-            height: 40px;
+            width: 36px;
+            height: 36px;
             border: 2px solid #2a2a4a;
-            border-radius: 8px;
+            border-radius: 6px;
             cursor: pointer;
             background: transparent;
             padding: 2px;
@@ -264,141 +240,114 @@
         .color-picker input[type="color"]::-webkit-color-swatch-wrapper {
             padding: 0;
         }
-        
         .color-picker input[type="color"]::-webkit-color-swatch {
             border: none;
-            border-radius: 6px;
+            border-radius: 4px;
         }
         
-        /* Список объектов */
-        .object-list {
-            max-height: 150px;
+        .part-list {
+            max-height: 120px;
             overflow-y: auto;
             display: flex;
             flex-direction: column;
-            gap: 4px;
+            gap: 3px;
         }
         
-        .object-list::-webkit-scrollbar {
+        .part-list::-webkit-scrollbar {
             width: 4px;
         }
-        
-        .object-list::-webkit-scrollbar-thumb {
+        .part-list::-webkit-scrollbar-thumb {
             background: #ffaa00;
             border-radius: 2px;
         }
         
-        .object-item {
-            padding: 6px 10px;
+        .part-item {
+            padding: 4px 10px;
             background: rgba(255,255,255,0.05);
-            border-radius: 6px;
+            border-radius: 4px;
             cursor: pointer;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             transition: all 0.2s;
             border: 1px solid transparent;
         }
         
-        .object-item:hover {
+        .part-item:hover {
             background: rgba(255,255,255,0.1);
         }
-        
-        .object-item.selected {
+        .part-item.selected {
             border-color: #ffaa00;
             background: rgba(255,170,0,0.1);
         }
-        
-        .object-item .delete-btn {
+        .part-item .delete-btn {
             background: none;
             border: none;
             color: #cc3344;
             cursor: pointer;
-            font-size: 1rem;
+            font-size: 0.9rem;
             padding: 0 4px;
         }
-        
-        .object-item .delete-btn:hover {
+        .part-item .delete-btn:hover {
             color: #ff4455;
         }
         
         .empty-message {
             color: #666688;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             text-align: center;
-            padding: 20px 0;
+            padding: 15px 0;
         }
         
-        /* Адаптивность */
         @media (max-width: 768px) {
             #app {
                 flex-direction: column;
             }
-            
             #toolbar {
                 width: 100%;
                 max-height: 50vh;
                 border-left: none;
                 border-top: 2px solid #2a2a4a;
             }
-            
             #viewport {
                 height: 50vh;
-            }
-        }
-        
-        @media (max-width: 480px) {
-            #toolbar {
-                padding: 12px;
-                gap: 10px;
-            }
-            
-            .btn {
-                font-size: 0.75rem;
-                padding: 6px 10px;
-            }
-            
-            .section {
-                padding: 10px;
             }
         }
     </style>
 </head>
 <body>
     <div id="app">
-        <!-- 3D вьюпорт -->
         <div id="viewport">
             <div id="selectionInfo">
-                Выделено: <span id="selectedName">Ничего</span>
-                <span style="margin-left: 15px; color: #8888aa;">|</span>
-                <span style="color: #8888aa;">Клик по объекту для выбора</span>
+                🎯 Выделено: <span id="selectedName">Корпус</span>
+                <span style="margin-left: 12px; color: #666;">| Клик по детали для выбора</span>
             </div>
         </div>
         
-        <!-- Панель инструментов -->
         <div id="toolbar">
             <div class="toolbar-title">
-                🛠️ Редактор блоков
+                🛠️ Редактор танка
             </div>
             
-            <!-- Добавление блоков -->
             <div class="section">
-                <div class="section-title">Добавить блок</div>
+                <div class="section-title">Детали танка (как в tank_1)</div>
                 <div class="btn-group">
-                    <button class="btn btn-success" onclick="addBlock('cube')">📦 Куб</button>
-                    <button class="btn btn-success" onclick="addBlock('wheel')">⚙️ Колесо</button>
-                    <button class="btn btn-success" onclick="addBlock('cylinder')">🧊 Цилиндр</button>
+                    <button class="btn btn-success" onclick="addPart('корпус')">📦 Корпус</button>
+                    <button class="btn btn-success" onclick="addPart('башня')">🔵 Башня</button>
+                    <button class="btn btn-success" onclick="addPart('дуло')">🔫 Дуло</button>
+                    <button class="btn btn-success" onclick="addPart('колесо')">⚙️ Колесо</button>
+                    <button class="btn btn-success" onclick="addPart('гусеница')">🎯 Гусеница</button>
+                    <button class="btn btn-success" onclick="addPart('люк')">🚪 Люк</button>
+                    <button class="btn btn-success" onclick="addPart('антенна')">📡 Антенна</button>
                 </div>
             </div>
             
-            <!-- Настройки выделенного объекта -->
-            <div class="section" id="propertiesSection">
-                <div class="section-title">Свойства объекта</div>
-                
+            <div class="section">
+                <div class="section-title">Свойства детали</div>
                 <div class="slider-group">
                     <div class="slider-item">
-                        <label>Длина (X) <span id="sizeXVal">1.00</span></label>
+                        <label>Ширина (X) <span id="sizeXVal">1.00</span></label>
                         <input type="range" id="sizeX" min="0.2" max="4" step="0.05" value="1" />
                     </div>
                     <div class="slider-item">
@@ -411,44 +360,42 @@
                     </div>
                     <div class="slider-item">
                         <label>Позиция X <span id="posXVal">0.00</span></label>
-                        <input type="range" id="posX" min="-10" max="10" step="0.1" value="0" />
+                        <input type="range" id="posX" min="-8" max="8" step="0.1" value="0" />
                     </div>
                     <div class="slider-item">
                         <label>Позиция Y <span id="posYVal">0.00</span></label>
-                        <input type="range" id="posY" min="-5" max="10" step="0.1" value="0" />
+                        <input type="range" id="posY" min="-2" max="6" step="0.1" value="0" />
                     </div>
                     <div class="slider-item">
                         <label>Позиция Z <span id="posZVal">0.00</span></label>
-                        <input type="range" id="posZ" min="-10" max="10" step="0.1" value="0" />
+                        <input type="range" id="posZ" min="-8" max="8" step="0.1" value="0" />
                     </div>
                     <div class="slider-item">
                         <label>Поворот Y <span id="rotYVal">0°</span></label>
                         <input type="range" id="rotY" min="-180" max="180" step="1" value="0" />
                     </div>
                 </div>
-                
-                <div class="color-picker" style="margin-top: 10px;">
-                    <label style="color: #aaaacc; font-size: 0.85rem;">Цвет:</label>
-                    <input type="color" id="objectColor" value="#5a7a3a" />
-                    <button class="btn btn-secondary" onclick="resetColor()" style="flex: 0; padding: 6px 12px;">↺</button>
+                <div class="color-picker" style="margin-top: 8px;">
+                    <label style="color: #aaaacc; font-size: 0.8rem;">Цвет:</label>
+                    <input type="color" id="partColor" value="#5a7a3a" />
+                    <button class="btn btn-secondary" onclick="resetColor()" style="flex: 0; padding: 4px 10px;">↺</button>
                 </div>
             </div>
             
-            <!-- Действия -->
             <div class="section">
                 <div class="section-title">Действия</div>
                 <div class="btn-group">
                     <button class="btn btn-danger" onclick="deleteSelected()">🗑️ Удалить</button>
-                    <button class="btn btn-secondary" onclick="clearAll()">🧹 Очистить всё</button>
-                    <button class="btn btn-primary" onclick="exportScene()">💾 Экспорт</button>
+                    <button class="btn btn-secondary" onclick="clearAll()">🧹 Очистить</button>
+                    <button class="btn btn-primary" onclick="exportTank()">💾 Экспорт</button>
+                    <button class="btn btn-secondary" onclick="loadDefaultTank()">🔄 Сброс</button>
                 </div>
             </div>
             
-            <!-- Список объектов -->
             <div class="section" style="flex: 1;">
-                <div class="section-title">Объекты (<span id="objectCount">0</span>)</div>
-                <div class="object-list" id="objectList">
-                    <div class="empty-message">Нет объектов</div>
+                <div class="section-title">Детали (<span id="partCount">0</span>)</div>
+                <div class="part-list" id="partList">
+                    <div class="empty-message">Нет деталей</div>
                 </div>
             </div>
         </div>
@@ -467,14 +414,13 @@
         import * as THREE from 'three';
         import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
         
-        // --- Настройка сцены ---
         const viewport = document.getElementById('viewport');
         const scene = new THREE.Scene();
         scene.background = new THREE.Color(0x1a1a2e);
         
         const camera = new THREE.PerspectiveCamera(45, viewport.clientWidth / viewport.clientHeight, 0.1, 100);
-        camera.position.set(6, 5, 8);
-        camera.lookAt(0, 0, 0);
+        camera.position.set(8, 5, 10);
+        camera.lookAt(0, 0.5, 0);
         
         const renderer = new THREE.WebGLRenderer({ antialias: true });
         renderer.setSize(viewport.clientWidth, viewport.clientHeight);
@@ -483,7 +429,6 @@
         renderer.setPixelRatio(window.devicePixelRatio);
         viewport.appendChild(renderer.domElement);
         
-        // --- Контролы ---
         const controls = new OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true;
         controls.dampingFactor = 0.1;
@@ -491,123 +436,158 @@
         controls.maxDistance = 30;
         controls.target.set(0, 0.5, 0);
         
-        // --- Свет ---
+        // Свет как в tank_1
         const ambient = new THREE.AmbientLight(0x404060, 0.6);
         scene.add(ambient);
-        
-        const mainLight = new THREE.DirectionalLight(0xffeedd, 1);
-        mainLight.position.set(10, 15, 5);
+        const mainLight = new THREE.DirectionalLight(0xffeedd, 1.2);
+        mainLight.position.set(10, 20, 5);
         mainLight.castShadow = true;
         mainLight.shadow.mapSize.width = 1024;
         mainLight.shadow.mapSize.height = 1024;
         scene.add(mainLight);
-        
-        const fillLight = new THREE.DirectionalLight(0x4488ff, 0.3);
-        fillLight.position.set(-5, 5, -10);
+        const fillLight = new THREE.DirectionalLight(0x8888ff, 0.5);
+        fillLight.position.set(-10, 5, -10);
         scene.add(fillLight);
+        const backLight = new THREE.DirectionalLight(0xffaa55, 0.3);
+        backLight.position.set(-5, 5, -15);
+        scene.add(backLight);
         
-        // --- Пол ---
-        const gridHelper = new THREE.GridHelper(20, 20, 0xffaa00, 0x445566);
+        // Пол как в tank_1
+        const gridHelper = new THREE.GridHelper(30, 20, 0xffaa00, 0x445566);
+        gridHelper.position.y = -0.01;
         scene.add(gridHelper);
         
-        // --- Хранение объектов ---
-        const objects = [];
-        let selectedObject = null;
-        let objectIdCounter = 0;
+        const groundMat = new THREE.ShadowMaterial({ opacity: 0.3 });
+        const groundPlane = new THREE.Mesh(new THREE.PlaneGeometry(30, 30), groundMat);
+        groundPlane.rotation.x = -Math.PI / 2;
+        groundPlane.position.y = -0.01;
+        groundPlane.receiveShadow = true;
+        scene.add(groundPlane);
         
-        // --- Функции создания блоков ---
-        function createBlock(type, color = '#5a7a3a') {
+        // Деревья как в tank_1
+        for (let i = 0; i < 12; i++) {
+            const angle = (i / 12) * Math.PI * 2;
+            const radius = 8 + Math.random() * 4;
+            const x = Math.cos(angle) * radius;
+            const z = Math.sin(angle) * radius;
+            const pillar = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.15, 0.25, 1.5, 6),
+                new THREE.MeshStandardMaterial({ color: 0x8B7355, roughness: 0.8 })
+            );
+            pillar.position.set(x, 0.75, z);
+            pillar.castShadow = true;
+            pillar.receiveShadow = true;
+            scene.add(pillar);
+            const top = new THREE.Mesh(
+                new THREE.SphereGeometry(0.3, 6),
+                new THREE.MeshStandardMaterial({ color: 0x2d8a4e, roughness: 0.6 })
+            );
+            top.position.set(x, 1.6, z);
+            top.castShadow = true;
+            scene.add(top);
+        }
+        
+        // Хранение деталей
+        const parts = [];
+        let selectedPart = null;
+        let partIdCounter = 0;
+        
+        // Функция создания деталей как в tank_1
+        function createPart(type, color = '#5a7a3a', pos = { x: 0, y: 0, z: 0 }, scale = { x: 1, y: 1, z: 1 }, rot = { x: 0, y: 0, z: 0 }) {
             let geometry, mesh;
-            const id = objectIdCounter++;
+            const id = partIdCounter++;
             
             switch(type) {
-                case 'cube':
-                    geometry = new THREE.BoxGeometry(1, 1, 1);
-                    mesh = new THREE.Mesh(geometry, new THREE.MeshStandardMaterial({ color: color }));
-                    mesh.userData.isWheel = false;
+                case 'корпус':
+                    geometry = new THREE.BoxGeometry(2.2, 0.6, 3.6);
+                    mesh = new THREE.Mesh(geometry, new THREE.MeshStandardMaterial({ color: color, roughness: 0.6, metalness: 0.3 }));
                     break;
-                case 'wheel':
-                    geometry = new THREE.CylinderGeometry(0.5, 0.5, 0.3, 16);
-                    mesh = new THREE.Mesh(geometry, new THREE.MeshStandardMaterial({ color: '#333333' }));
-                    mesh.userData.isWheel = true;
+                case 'башня':
+                    geometry = new THREE.CylinderGeometry(1.1, 1.3, 0.5, 16);
+                    mesh = new THREE.Mesh(geometry, new THREE.MeshStandardMaterial({ color: color, roughness: 0.5, metalness: 0.4 }));
+                    break;
+                case 'дуло':
+                    geometry = new THREE.CylinderGeometry(0.12, 0.16, 1.8, 8);
+                    mesh = new THREE.Mesh(geometry, new THREE.MeshStandardMaterial({ color: '#3a3a3a', roughness: 0.4, metalness: 0.7 }));
                     mesh.rotation.x = Math.PI / 2;
                     break;
-                case 'cylinder':
-                    geometry = new THREE.CylinderGeometry(0.5, 0.5, 1, 12);
-                    mesh = new THREE.Mesh(geometry, new THREE.MeshStandardMaterial({ color: color }));
-                    mesh.userData.isWheel = false;
+                case 'колесо':
+                    geometry = new THREE.CylinderGeometry(0.25, 0.25, 0.12, 8);
+                    mesh = new THREE.Mesh(geometry, new THREE.MeshStandardMaterial({ color: '#333333', roughness: 0.8, metalness: 0.2 }));
+                    mesh.rotation.z = Math.PI / 2;
+                    break;
+                case 'гусеница':
+                    geometry = new THREE.BoxGeometry(0.35, 0.25, 3.8);
+                    mesh = new THREE.Mesh(geometry, new THREE.MeshStandardMaterial({ color: '#222222', roughness: 0.9, metalness: 0.1 }));
+                    break;
+                case 'люк':
+                    geometry = new THREE.CylinderGeometry(0.2, 0.25, 0.08, 8);
+                    mesh = new THREE.Mesh(geometry, new THREE.MeshStandardMaterial({ color: '#4a6a2a', roughness: 0.7 }));
+                    break;
+                case 'антенна':
+                    geometry = new THREE.CylinderGeometry(0.02, 0.02, 0.8, 4);
+                    mesh = new THREE.Mesh(geometry, new THREE.MeshStandardMaterial({ color: '#888888', metalness: 0.5, roughness: 0.4 }));
                     break;
                 default:
                     geometry = new THREE.BoxGeometry(1, 1, 1);
                     mesh = new THREE.Mesh(geometry, new THREE.MeshStandardMaterial({ color: color }));
-                    mesh.userData.isWheel = false;
             }
             
             mesh.castShadow = true;
             mesh.receiveShadow = true;
+            mesh.position.set(pos.x, pos.y, pos.z);
+            mesh.scale.set(scale.x, scale.y, scale.z);
+            mesh.rotation.set(rot.x, rot.y, rot.z);
             mesh.userData.type = type;
             mesh.userData.id = id;
             mesh.userData.name = `${type}_${id}`;
             
-            // Позиционируем на полу
-            mesh.position.y = type === 'wheel' ? 0.5 : 0.5;
-            
             scene.add(mesh);
             
-            const objData = {
-                mesh: mesh,
-                id: id,
-                type: type,
-                name: mesh.userData.name
-            };
-            
-            objects.push(objData);
+            const partData = { mesh, id, type, name: mesh.userData.name };
+            parts.push(partData);
             updateUI();
-            selectObject(objData);
-            
-            return objData;
+            selectPart(partData);
+            return partData;
         }
         
-        // --- Выбор объекта ---
-        function selectObject(objData) {
-            selectedObject = objData;
+        // Выбор детали
+        function selectPart(partData) {
+            selectedPart = partData;
             updateProperties();
             updateUI();
             
-            // Визуальное выделение
-            objects.forEach(o => {
-                if (o.mesh.material._origEmissive === undefined) {
-                    o.mesh.material._origEmissive = o.mesh.material.emissive.clone();
+            parts.forEach(p => {
+                if (p.mesh.material._origEmissive === undefined) {
+                    p.mesh.material._origEmissive = p.mesh.material.emissive.clone();
                 }
-                o.mesh.material.emissive.setHex(0x000000);
+                p.mesh.material.emissive.setHex(0x000000);
             });
             
-            if (objData) {
-                objData.mesh.material.emissive.setHex(0xffaa00);
-                objData.mesh.material.emissiveIntensity = 0.2;
+            if (partData) {
+                partData.mesh.material.emissive.setHex(0xffaa00);
+                partData.mesh.material.emissiveIntensity = 0.2;
+                document.getElementById('selectedName').textContent = partData.name;
             }
         }
         
-        // --- Обновление свойств в UI ---
+        // Обновление свойств
         function updateProperties() {
-            if (!selectedObject) {
+            if (!selectedPart) {
                 document.getElementById('selectedName').textContent = 'Ничего';
                 return;
             }
             
-            const mesh = selectedObject.mesh;
-            document.getElementById('selectedName').textContent = selectedObject.name;
+            const mesh = selectedPart.mesh;
+            document.getElementById('selectedName').textContent = selectedPart.name;
             
-            // Размеры
-            const scale = mesh.scale;
-            document.getElementById('sizeX').value = scale.x;
-            document.getElementById('sizeXVal').textContent = scale.x.toFixed(2);
-            document.getElementById('sizeY').value = scale.y;
-            document.getElementById('sizeYVal').textContent = scale.y.toFixed(2);
-            document.getElementById('sizeZ').value = scale.z;
-            document.getElementById('sizeZVal').textContent = scale.z.toFixed(2);
+            document.getElementById('sizeX').value = mesh.scale.x;
+            document.getElementById('sizeXVal').textContent = mesh.scale.x.toFixed(2);
+            document.getElementById('sizeY').value = mesh.scale.y;
+            document.getElementById('sizeYVal').textContent = mesh.scale.y.toFixed(2);
+            document.getElementById('sizeZ').value = mesh.scale.z;
+            document.getElementById('sizeZVal').textContent = mesh.scale.z.toFixed(2);
             
-            // Позиция
             document.getElementById('posX').value = mesh.position.x;
             document.getElementById('posXVal').textContent = mesh.position.x.toFixed(2);
             document.getElementById('posY').value = mesh.position.y;
@@ -615,111 +595,195 @@
             document.getElementById('posZ').value = mesh.position.z;
             document.getElementById('posZVal').textContent = mesh.position.z.toFixed(2);
             
-            // Поворот
             const rotY = THREE.MathUtils.radToDeg(mesh.rotation.y);
             document.getElementById('rotY').value = rotY;
             document.getElementById('rotYVal').textContent = `${Math.round(rotY)}°`;
             
-            // Цвет
             const color = mesh.material.color.getHexString();
-            document.getElementById('objectColor').value = `#${color}`;
+            document.getElementById('partColor').value = `#${color}`;
         }
         
-        // --- Обновление списка объектов ---
         function updateUI() {
-            const list = document.getElementById('objectList');
-            const count = document.getElementById('objectCount');
-            count.textContent = objects.length;
+            const list = document.getElementById('partList');
+            const count = document.getElementById('partCount');
+            count.textContent = parts.length;
             
-            if (objects.length === 0) {
-                list.innerHTML = '<div class="empty-message">Нет объектов</div>';
+            if (parts.length === 0) {
+                list.innerHTML = '<div class="empty-message">Нет деталей</div>';
                 return;
             }
             
-            list.innerHTML = objects.map(obj => `
-                <div class="object-item ${selectedObject && selectedObject.id === obj.id ? 'selected' : ''}"
-                     onclick="window.selectObjectById(${obj.id})">
-                    <span>${obj.type === 'wheel' ? '⚙️' : '📦'} ${obj.name}</span>
-                    <button class="delete-btn" onclick="event.stopPropagation(); window.deleteObject(${obj.id})">✕</button>
+            list.innerHTML = parts.map(p => `
+                <div class="part-item ${selectedPart && selectedPart.id === p.id ? 'selected' : ''}"
+                     onclick="window.selectPartById(${p.id})">
+                    <span>${p.type === 'колесо' ? '⚙️' : p.type === 'дуло' ? '🔫' : p.type === 'гусеница' ? '🎯' : p.type === 'люк' ? '🚪' : p.type === 'антенна' ? '📡' : '📦'} ${p.name}</span>
+                    <button class="delete-btn" onclick="event.stopPropagation(); window.deletePart(${p.id})">✕</button>
                 </div>
             `).join('');
         }
         
-        // --- Глобальные функции для доступа из HTML ---
-        window.addBlock = function(type) {
-            createBlock(type);
+        // Глобальные функции
+        window.addPart = function(type) {
+            const colors = {
+                'корпус': '#5a7a3a',
+                'башня': '#6d8c4a',
+                'дуло': '#3a3a3a',
+                'колесо': '#333333',
+                'гусеница': '#222222',
+                'люк': '#4a6a2a',
+                'антенна': '#888888'
+            };
+            const yOffsets = {
+                'корпус': 0.3,
+                'башня': 0.85,
+                'дуло': 1.05,
+                'колесо': 0.15,
+                'гусеница': 0.15,
+                'люк': 1.25,
+                'антенна': 1.4
+            };
+            createPart(type, colors[type] || '#5a7a3a', { x: 0, y: yOffsets[type] || 0.5, z: 0 });
         };
         
-        window.deleteObject = function(id) {
-            const index = objects.findIndex(o => o.id === id);
+        window.selectPartById = function(id) {
+            const p = parts.find(o => o.id === id);
+            if (p) selectPart(p);
+        };
+        
+        window.deletePart = function(id) {
+            const index = parts.findIndex(p => p.id === id);
             if (index === -1) return;
-            
-            const obj = objects[index];
-            scene.remove(obj.mesh);
-            objects.splice(index, 1);
-            
-            if (selectedObject && selectedObject.id === id) {
-                selectedObject = objects.length > 0 ? objects[0] : null;
-                if (selectedObject) selectObject(selectedObject);
-                else {
-                    selectedObject = null;
-                    updateProperties();
-                }
+            const p = parts[index];
+            scene.remove(p.mesh);
+            parts.splice(index, 1);
+            if (selectedPart && selectedPart.id === id) {
+                selectedPart = parts.length > 0 ? parts[0] : null;
+                if (selectedPart) selectPart(selectedPart);
+                else { selectedPart = null; updateProperties(); }
             }
-            
             updateUI();
         };
         
-        window.selectObjectById = function(id) {
-            const obj = objects.find(o => o.id === id);
-            if (obj) selectObject(obj);
-        };
-        
         window.deleteSelected = function() {
-            if (selectedObject) {
-                window.deleteObject(selectedObject.id);
-            }
+            if (selectedPart) window.deletePart(selectedPart.id);
         };
         
         window.clearAll = function() {
-            if (objects.length === 0) return;
-            if (!confirm('Удалить все объекты?')) return;
-            
-            objects.forEach(obj => scene.remove(obj.mesh));
-            objects.length = 0;
-            selectedObject = null;
+            if (parts.length === 0) return;
+            if (!confirm('Удалить все детали?')) return;
+            parts.forEach(p => scene.remove(p.mesh));
+            parts.length = 0;
+            selectedPart = null;
             updateUI();
             updateProperties();
         };
         
         window.resetColor = function() {
-            if (selectedObject) {
-                selectedObject.mesh.material.color.setHex(0x5a7a3a);
-                document.getElementById('objectColor').value = '#5a7a3a';
+            if (selectedPart) {
+                selectedPart.mesh.material.color.setHex(0x5a7a3a);
+                document.getElementById('partColor').value = '#5a7a3a';
             }
         };
         
-        window.exportScene = function() {
-            const data = objects.map(obj => ({
-                type: obj.type,
-                position: obj.mesh.position.toArray(),
-                scale: obj.mesh.scale.toArray(),
-                rotation: [obj.mesh.rotation.x, obj.mesh.rotation.y, obj.mesh.rotation.z],
-                color: obj.mesh.material.color.getHexString(),
-                isWheel: obj.mesh.userData.isWheel || false
+        window.exportTank = function() {
+            const data = parts.map(p => ({
+                type: p.type,
+                position: p.mesh.position.toArray(),
+                scale: p.mesh.scale.toArray(),
+                rotation: [p.mesh.rotation.x, p.mesh.rotation.y, p.mesh.rotation.z],
+                color: p.mesh.material.color.getHexString()
             }));
-            
             const json = JSON.stringify(data, null, 2);
             const blob = new Blob([json], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = 'tank_blocks.json';
+            a.download = 'tank_parts.json';
             a.click();
             URL.revokeObjectURL(url);
         };
         
-        // --- Связывание слайдеров ---
+        // Загрузка ТОЧНО ТАКОГО ЖЕ танка как в tank_1.html
+        window.loadDefaultTank = function() {
+            clearAll();
+            
+            // Корпус
+            const body = createPart('корпус', '#5a7a3a', { x: 0, y: 0.3, z: 0 });
+            
+            // Броневые листы
+            const armorMat = new THREE.MeshStandardMaterial({ color: 0x6a8a4a, roughness: 0.5, metalness: 0.4 });
+            const armorFront = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.15, 0.3), armorMat);
+            armorFront.position.set(0, 0.45, 1.85);
+            armorFront.castShadow = true;
+            scene.add(armorFront);
+            const armorFrontData = { mesh: armorFront, id: partIdCounter++, type: 'броня', name: 'броня_перед' };
+            parts.push(armorFrontData);
+            
+            const armorBack = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.15, 0.3), armorMat);
+            armorBack.position.set(0, 0.45, -1.85);
+            armorBack.castShadow = true;
+            scene.add(armorBack);
+            const armorBackData = { mesh: armorBack, id: partIdCounter++, type: 'броня', name: 'броня_зад' };
+            parts.push(armorBackData);
+            
+            // Башня
+            const turret = createPart('башня', '#6d8c4a', { x: 0, y: 0.85, z: 0 });
+            
+            // Верх башни
+            const turretTopMat = new THREE.MeshStandardMaterial({ color: 0x6d8c4a, roughness: 0.5, metalness: 0.5 });
+            const turretTop = new THREE.Mesh(new THREE.CylinderGeometry(0.9, 1.1, 0.35, 16), turretTopMat);
+            turretTop.position.set(0, 1.1, 0);
+            turretTop.castShadow = true;
+            scene.add(turretTop);
+            const turretTopData = { mesh: turretTop, id: partIdCounter++, type: 'башня_верх', name: 'башня_верх' };
+            parts.push(turretTopData);
+            
+            // Дуло
+            const barrel = createPart('дуло', '#3a3a3a', { x: 0, y: 1.05, z: 1.5 });
+            barrel.mesh.rotation.x = Math.PI / 2;
+            
+            // Набалдашник дула
+            const muzzleMat = new THREE.MeshStandardMaterial({ color: 0x2a2a2a, metalness: 0.8, roughness: 0.3 });
+            const muzzle = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.22, 0.15, 8), muzzleMat);
+            muzzle.rotation.x = Math.PI / 2;
+            muzzle.position.set(0, 1.05, 2.4);
+            muzzle.castShadow = true;
+            scene.add(muzzle);
+            const muzzleData = { mesh: muzzle, id: partIdCounter++, type: 'дуло_наконечник', name: 'дуло_наконечник' };
+            parts.push(muzzleData);
+            
+            // Броня дула
+            const mantletMat = new THREE.MeshStandardMaterial({ color: 0x5a7a3a, roughness: 0.6 });
+            const mantlet = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.3, 0.3), mantletMat);
+            mantlet.position.set(0, 1.05, 1.1);
+            mantlet.castShadow = true;
+            scene.add(mantlet);
+            const mantletData = { mesh: mantlet, id: partIdCounter++, type: 'броня_дула', name: 'броня_дула' };
+            parts.push(mantletData);
+            
+            // Гусеницы
+            const trackLeft = createPart('гусеница', '#222222', { x: -1.35, y: 0.15, z: 0 });
+            const trackRight = createPart('гусеница', '#222222', { x: 1.35, y: 0.15, z: 0 });
+            
+            // Колеса (6 штук как в tank_1)
+            for (let side = -1; side <= 1; side += 2) {
+                for (let i = -1; i <= 1; i++) {
+                    const wheel = createPart('колесо', '#333333', { x: side * 1.35, y: 0.15, z: i * 1.2 });
+                }
+            }
+            
+            // Люк
+            const hatch = createPart('люк', '#4a6a2a', { x: 0.4, y: 1.25, z: -0.3 });
+            
+            // Антенна
+            const antenna = createPart('антенна', '#888888', { x: 0.5, y: 1.4, z: -0.5 });
+            
+            // Выбираем корпус
+            selectPart(body);
+            updateUI();
+        };
+        
+        // Настройка слайдеров
         function setupSlider(id, callback) {
             const input = document.getElementById(id);
             input.addEventListener('input', () => {
@@ -736,85 +800,36 @@
             });
         }
         
-        setupSlider('sizeX', (val) => {
-            if (selectedObject) {
-                selectedObject.mesh.scale.x = val;
-            }
+        setupSlider('sizeX', (val) => { if (selectedPart) selectedPart.mesh.scale.x = val; });
+        setupSlider('sizeY', (val) => { if (selectedPart) selectedPart.mesh.scale.y = val; });
+        setupSlider('sizeZ', (val) => { if (selectedPart) selectedPart.mesh.scale.z = val; });
+        setupSlider('posX', (val) => { if (selectedPart) selectedPart.mesh.position.x = val; });
+        setupSlider('posY', (val) => { if (selectedPart) selectedPart.mesh.position.y = val; });
+        setupSlider('posZ', (val) => { if (selectedPart) selectedPart.mesh.position.z = val; });
+        setupSlider('rotY', (val) => { if (selectedPart) selectedPart.mesh.rotation.y = THREE.MathUtils.degToRad(val); });
+        
+        document.getElementById('partColor').addEventListener('input', (e) => {
+            if (selectedPart) selectedPart.mesh.material.color.set(e.target.value);
         });
         
-        setupSlider('sizeY', (val) => {
-            if (selectedObject) {
-                selectedObject.mesh.scale.y = val;
-            }
-        });
-        
-        setupSlider('sizeZ', (val) => {
-            if (selectedObject) {
-                selectedObject.mesh.scale.z = val;
-            }
-        });
-        
-        setupSlider('posX', (val) => {
-            if (selectedObject) {
-                selectedObject.mesh.position.x = val;
-            }
-        });
-        
-        setupSlider('posY', (val) => {
-            if (selectedObject) {
-                selectedObject.mesh.position.y = val;
-            }
-        });
-        
-        setupSlider('posZ', (val) => {
-            if (selectedObject) {
-                selectedObject.mesh.position.z = val;
-            }
-        });
-        
-        setupSlider('rotY', (val) => {
-            if (selectedObject) {
-                selectedObject.mesh.rotation.y = THREE.MathUtils.degToRad(val);
-            }
-        });
-        
-        // --- Цвет ---
-        document.getElementById('objectColor').addEventListener('input', (e) => {
-            if (selectedObject) {
-                selectedObject.mesh.material.color.set(e.target.value);
-            }
-        });
-        
-        // --- Raycaster для выбора кликом ---
+        // Клик по сцене для выбора
         const raycaster = new THREE.Raycaster();
         const mouse = new THREE.Vector2();
-        
         renderer.domElement.addEventListener('click', (event) => {
             const rect = renderer.domElement.getBoundingClientRect();
             mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
             mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
-            
             raycaster.setFromCamera(mouse, camera);
-            
-            const meshes = objects.map(o => o.mesh);
+            const meshes = parts.map(p => p.mesh);
             const intersects = raycaster.intersectObjects(meshes);
-            
             if (intersects.length > 0) {
                 const hitMesh = intersects[0].object;
-                const objData = objects.find(o => o.mesh === hitMesh);
-                if (objData) selectObject(objData);
-            } else {
-                // Снимаем выделение
-                if (selectedObject) {
-                    selectedObject.mesh.material.emissive.setHex(0x000000);
-                    selectedObject = null;
-                    updateProperties();
-                    updateUI();
-                }
+                const partData = parts.find(p => p.mesh === hitMesh);
+                if (partData) selectPart(partData);
             }
         });
         
-        // --- Анимация ---
+        // Анимация
         function animate() {
             requestAnimationFrame(animate);
             controls.update();
@@ -822,7 +837,6 @@
         }
         animate();
         
-        // --- Адаптация размера ---
         window.addEventListener('resize', () => {
             const w = viewport.clientWidth;
             const h = viewport.clientHeight;
@@ -831,27 +845,12 @@
             renderer.setSize(w, h);
         });
         
-        // Создаем стартовые блоки для примера
-        setTimeout(() => {
-            const block1 = createBlock('cube', '#5a7a3a');
-            block1.mesh.position.set(-1.5, 0.5, 0);
-            
-            const block2 = createBlock('cube', '#4a6a2a');
-            block2.mesh.position.set(1.5, 0.5, 0);
-            block2.mesh.scale.set(1, 0.8, 2);
-            
-            const wheel1 = createBlock('wheel');
-            wheel1.mesh.position.set(-1, 0.3, 1.5);
-            
-            const wheel2 = createBlock('wheel');
-            wheel2.mesh.position.set(1, 0.3, 1.5);
-            
-            // Выбираем первый блок
-            selectObject(block1);
-        }, 100);
+        // Загружаем ТОЧНО ТАКОЙ ЖЕ танк как в tank_1.html
+        setTimeout(loadDefaultTank, 100);
         
-        console.log('🛠️ Редактор блоков загружен!');
-        console.log('📦 Добавляйте блоки, изменяйте размеры и позиции.');
+        console.log('🛠️ Редактор с танком из tank_1.html загружен!');
+        console.log('🎯 Кликайте по деталям для редактирования');
+        console.log('📦 Все детали как в оригинальном танке');
     </script>
 </body>
 </html>
