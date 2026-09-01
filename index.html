@@ -3,540 +3,750 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Танк - Редактор и Игра</title>
+    <title>Редактор танка - 3D</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
+        
         body {
             background: #0a0a1a;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: white;
             overflow: hidden;
             height: 100vh;
-            width: 100vw;
         }
         
-        #gameContainer {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
+        #app {
+            display: flex;
             height: 100vh;
-            z-index: 1;
         }
         
-        #gameContainer iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
+        #viewport {
+            flex: 1;
+            position: relative;
+            background: #1a1a2e;
+            overflow: hidden;
+        }
+        
+        #viewport canvas {
             display: block;
+            width: 100% !important;
+            height: 100% !important;
         }
         
-        /* Верхняя панель */
-        #navbar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            z-index: 100;
-            background: rgba(10, 10, 30, 0.95);
-            backdrop-filter: blur(12px);
-            padding: 12px 24px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 3px solid #ffaa00;
-            box-shadow: 0 4px 30px rgba(0,0,0,0.9);
-            transition: transform 0.3s ease;
+        #selectionInfo {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(0,0,0,0.8);
+            padding: 10px 18px;
+            border-radius: 10px;
+            border-left: 3px solid #ffaa00;
+            pointer-events: none;
+            font-size: 0.85rem;
+            backdrop-filter: blur(4px);
         }
         
-        .logo {
+        #selectionInfo span {
+            color: #ffaa00;
+            font-weight: bold;
+        }
+        
+        #toolbar {
+            width: 340px;
+            background: rgba(20, 20, 40, 0.95);
+            backdrop-filter: blur(10px);
+            border-left: 2px solid #2a2a4a;
+            padding: 20px;
+            overflow-y: auto;
             display: flex;
-            align-items: center;
-            gap: 14px;
-            color: white;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        #toolbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        #toolbar::-webkit-scrollbar-track {
+            background: rgba(0,0,0,0.2);
+        }
+        #toolbar::-webkit-scrollbar-thumb {
+            background: #ffaa00;
+            border-radius: 3px;
+        }
+        
+        .toolbar-title {
             font-size: 1.4rem;
             font-weight: 700;
-        }
-        
-        .logo span {
             color: #ffaa00;
-        }
-        
-        .logo-icon {
-            font-size: 2rem;
-        }
-        
-        .nav-controls {
-            display: flex;
-            gap: 12px;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-        
-        .nav-btn {
-            padding: 8px 20px;
-            border: 2px solid #ffaa00;
-            border-radius: 25px;
-            cursor: pointer;
-            font-size: 0.9rem;
-            font-weight: 700;
-            transition: all 0.3s ease;
-            background: rgba(255, 170, 0, 0.1);
-            color: #ffaa00;
-            letter-spacing: 0.5px;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #2a2a4a;
         }
         
-        .nav-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 25px rgba(255, 170, 0, 0.3);
-        }
-        
-        .nav-btn.active-editor {
-            background: #44aa44;
-            border-color: #44aa44;
-            color: white;
-            box-shadow: 0 0 30px rgba(68, 170, 68, 0.5);
-        }
-        
-        .nav-btn.active-game {
-            background: #ff6600;
-            border-color: #ff6600;
-            color: white;
-            box-shadow: 0 0 30px rgba(255, 102, 0, 0.5);
-        }
-        
-        .nav-btn.editor-btn {
-            border-color: #44aa44;
-            color: #88ff88;
-            background: rgba(68, 170, 68, 0.15);
-        }
-        
-        .nav-btn.game-btn {
-            border-color: #ff6600;
-            color: #ff8844;
-            background: rgba(255, 102, 0, 0.15);
-        }
-        
-        .status-badge {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 6px 16px;
-            border-radius: 25px;
-            font-size: 0.85rem;
-            font-weight: 600;
-        }
-        
-        .status-badge.editor-mode {
-            background: rgba(68, 170, 68, 0.15);
-            border: 1px solid #44aa44;
-            color: #88ff88;
-        }
-        
-        .status-badge.game-mode {
-            background: rgba(255, 102, 0, 0.15);
-            border: 1px solid #ff6600;
-            color: #ff8844;
-        }
-        
-        .status-dot {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            animation: pulse 1.5s infinite;
-        }
-        
-        .status-dot.editor {
-            background: #44ff44;
-        }
-        
-        .status-dot.game {
-            background: #ff6600;
-        }
-        
-        @keyframes pulse {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.5; transform: scale(0.8); }
-        }
-        
-        #toggleNav {
-            position: fixed;
-            top: 10px;
-            right: 10px;
-            z-index: 101;
-            background: rgba(0,0,0,0.7);
-            border: 1px solid #ffaa00;
-            color: #ffaa00;
-            padding: 8px 14px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 1.2rem;
-            transition: all 0.3s ease;
-            display: none;
-        }
-        
-        #toggleNav:hover {
-            background: #ffaa00;
-            color: #0a0a1a;
-        }
-        
-        #gameInfo {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 50;
-            color: rgba(255,255,255,0.6);
-            font-size: 0.85rem;
-            text-align: center;
-            background: rgba(0,0,0,0.7);
-            padding: 8px 24px;
-            border-radius: 30px;
-            backdrop-filter: blur(6px);
-            pointer-events: none;
+        .section {
+            background: rgba(255,255,255,0.03);
+            border-radius: 10px;
+            padding: 12px;
             border: 1px solid rgba(255,255,255,0.05);
         }
         
-        #modeIndicator {
-            position: fixed;
-            top: 80px;
-            right: 20px;
-            z-index: 50;
-            padding: 12px 24px;
-            border-radius: 12px;
-            font-weight: 700;
-            font-size: 1.2rem;
-            backdrop-filter: blur(8px);
-            pointer-events: none;
-            animation: slideIn 0.5s ease;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
-        }
-        
-        @keyframes slideIn {
-            from { transform: translateX(100px); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
-        
-        #modeIndicator.editor-mode {
-            background: rgba(68, 170, 68, 0.25);
-            border: 2px solid #44aa44;
-            color: #88ff88;
-            text-shadow: 0 0 20px rgba(68, 170, 68, 0.3);
-        }
-        
-        #modeIndicator.game-mode {
-            background: rgba(255, 102, 0, 0.25);
-            border: 2px solid #ff6600;
-            color: #ff8844;
-            text-shadow: 0 0 20px rgba(255, 102, 0, 0.3);
-        }
-        
-        /* Огромная кнопка переключения */
-        #bigSwitch {
-            position: fixed;
-            bottom: 80px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 60;
-            padding: 15px 40px;
-            border-radius: 50px;
-            font-size: 1.3rem;
-            font-weight: 800;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            border: none;
-            box-shadow: 0 4px 30px rgba(0,0,0,0.7);
+        .section-title {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            color: #8888aa;
             letter-spacing: 1px;
-            display: none;
+            margin-bottom: 8px;
+            font-weight: 600;
         }
         
-        #bigSwitch:hover {
-            transform: translateX(-50%) scale(1.05);
+        .btn-group {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
         }
         
-        #bigSwitch.switch-to-editor {
-            background: #44aa44;
+        .btn {
+            padding: 6px 14px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            flex: 1;
+            justify-content: center;
+            min-width: 50px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(255,170,0,0.3);
+        }
+        
+        .btn:active {
+            transform: scale(0.95);
+        }
+        
+        .btn-success {
+            background: #2d8a4e;
+            color: white;
+        }
+        .btn-success:hover {
+            background: #3a9a5e;
+        }
+        .btn-danger {
+            background: #cc3344;
+            color: white;
+        }
+        .btn-danger:hover {
+            background: #dd4455;
+        }
+        .btn-primary {
+            background: #ffaa00;
+            color: #0a0a1a;
+        }
+        .btn-primary:hover {
+            background: #ffbb22;
+        }
+        .btn-secondary {
+            background: rgba(255,255,255,0.1);
+            color: #aaa;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .btn-secondary:hover {
+            background: rgba(255,255,255,0.15);
             color: white;
         }
         
-        #bigSwitch.switch-to-game {
-            background: #ff6600;
-            color: white;
+        .slider-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .slider-item {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+        
+        .slider-item label {
+            font-size: 0.8rem;
+            color: #aaaacc;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .slider-item label span {
+            color: #ffaa00;
+            font-weight: 600;
+        }
+        
+        input[type="range"] {
+            width: 100%;
+            height: 5px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: #2a2a4a;
+            border-radius: 3px;
+            outline: none;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: #ffaa00;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(255,170,0,0.3);
+        }
+        
+        input[type="range"]::-moz-range-thumb {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: #ffaa00;
+            cursor: pointer;
+            border: none;
+        }
+        
+        .color-picker {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .color-picker input[type="color"] {
+            width: 36px;
+            height: 36px;
+            border: 2px solid #2a2a4a;
+            border-radius: 6px;
+            cursor: pointer;
+            background: transparent;
+            padding: 2px;
+        }
+        
+        .color-picker input[type="color"]::-webkit-color-swatch-wrapper {
+            padding: 0;
+        }
+        .color-picker input[type="color"]::-webkit-color-swatch {
+            border: none;
+            border-radius: 4px;
+        }
+        
+        .object-list {
+            max-height: 120px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+        
+        .object-list::-webkit-scrollbar {
+            width: 4px;
+        }
+        .object-list::-webkit-scrollbar-thumb {
+            background: #ffaa00;
+            border-radius: 2px;
+        }
+        
+        .object-item {
+            padding: 4px 10px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.8rem;
+            transition: all 0.2s;
+            border: 1px solid transparent;
+        }
+        
+        .object-item:hover {
+            background: rgba(255,255,255,0.1);
+        }
+        .object-item.selected {
+            border-color: #ffaa00;
+            background: rgba(255,170,0,0.1);
+        }
+        .object-item .delete-btn {
+            background: none;
+            border: none;
+            color: #cc3344;
+            cursor: pointer;
+            font-size: 0.9rem;
+            padding: 0 4px;
+        }
+        .object-item .delete-btn:hover {
+            color: #ff4455;
+        }
+        
+        .empty-message {
+            color: #666688;
+            font-size: 0.8rem;
+            text-align: center;
+            padding: 15px 0;
         }
         
         @media (max-width: 768px) {
-            #navbar {
-                padding: 8px 12px;
-                flex-wrap: wrap;
-                gap: 8px;
+            #app {
+                flex-direction: column;
             }
-            
-            .logo {
-                font-size: 1rem;
+            #toolbar {
+                width: 100%;
+                max-height: 50vh;
+                border-left: none;
+                border-top: 2px solid #2a2a4a;
             }
-            
-            .logo-icon {
-                font-size: 1.3rem;
-            }
-            
-            .nav-btn {
-                padding: 5px 12px;
-                font-size: 0.75rem;
-            }
-            
-            .status-badge {
-                font-size: 0.65rem;
-                padding: 3px 10px;
-            }
-            
-            #gameInfo {
-                font-size: 0.6rem;
-                padding: 4px 12px;
-                bottom: 10px;
-            }
-            
-            #modeIndicator {
-                top: 70px;
-                right: 10px;
-                font-size: 0.8rem;
-                padding: 6px 12px;
-            }
-            
-            #bigSwitch {
-                padding: 10px 25px;
-                font-size: 1rem;
-                bottom: 60px;
+            #viewport {
+                height: 50vh;
             }
         }
     </style>
 </head>
 <body>
-    <!-- Панель навигации -->
-    <div id="navbar">
-        <div class="logo">
-            <span class="logo-icon">⚔️</span>
-            <span>ТАНКИ</span>
-            <span style="font-weight: 300; font-size: 0.8rem; opacity: 0.7;" id="modeLabel">| Редактор</span>
-        </div>
-        
-        <div class="nav-controls">
-            <div class="status-badge editor-mode" id="statusBadge">
-                <span class="status-dot editor" id="statusDot"></span>
-                <span id="statusText">РЕДАКТОР</span>
+    <div id="app">
+        <div id="viewport">
+            <div id="selectionInfo">
+                🎯 Выделено: <span id="selectedName">Корпус</span>
+                <span style="margin-left: 12px; color: #666;">| Клик по детали для выбора</span>
             </div>
-            <button class="nav-btn editor-btn active-editor" id="btnEditor" onclick="switchToEditor()">
-                🛠️ Редактор
-            </button>
-            <button class="nav-btn game-btn" id="btnGame" onclick="switchToGame()">
-                🎮 Игра
-            </button>
-            <button class="nav-btn" onclick="reloadFrame()" style="border-color: #666; color: #aaa; background: rgba(255,255,255,0.05);">
-                🔄
-            </button>
-            <button class="nav-btn" onclick="toggleFullscreen()" style="border-color: #666; color: #aaa; background: rgba(255,255,255,0.05);">
-                ⛶
-            </button>
+        </div>
+        
+        <div id="toolbar">
+            <div class="toolbar-title">
+                🛠️ Редактор танка
+            </div>
+            
+            <div class="section">
+                <div class="section-title">Детали танка</div>
+                <div class="btn-group">
+                    <button class="btn btn-success" onclick="addPart('корпус')">📦 Корпус</button>
+                    <button class="btn btn-success" onclick="addPart('башня')">🔵 Башня</button>
+                    <button class="btn btn-success" onclick="addPart('дуло')">🔫 Дуло</button>
+                    <button class="btn btn-success" onclick="addPart('колесо')">⚙️ Колесо</button>
+                </div>
+            </div>
+            
+            <div class="section">
+                <div class="section-title">Свойства детали</div>
+                <div class="slider-group">
+                    <div class="slider-item">
+                        <label>Ширина (X) <span id="sizeXVal">1.00</span></label>
+                        <input type="range" id="sizeX" min="0.2" max="4" step="0.05" value="1" />
+                    </div>
+                    <div class="slider-item">
+                        <label>Высота (Y) <span id="sizeYVal">1.00</span></label>
+                        <input type="range" id="sizeY" min="0.2" max="4" step="0.05" value="1" />
+                    </div>
+                    <div class="slider-item">
+                        <label>Глубина (Z) <span id="sizeZVal">1.00</span></label>
+                        <input type="range" id="sizeZ" min="0.2" max="4" step="0.05" value="1" />
+                    </div>
+                    <div class="slider-item">
+                        <label>Позиция X <span id="posXVal">0.00</span></label>
+                        <input type="range" id="posX" min="-8" max="8" step="0.1" value="0" />
+                    </div>
+                    <div class="slider-item">
+                        <label>Позиция Y <span id="posYVal">0.00</span></label>
+                        <input type="range" id="posY" min="-2" max="6" step="0.1" value="0" />
+                    </div>
+                    <div class="slider-item">
+                        <label>Позиция Z <span id="posZVal">0.00</span></label>
+                        <input type="range" id="posZ" min="-8" max="8" step="0.1" value="0" />
+                    </div>
+                    <div class="slider-item">
+                        <label>Поворот Y <span id="rotYVal">0°</span></label>
+                        <input type="range" id="rotY" min="-180" max="180" step="1" value="0" />
+                    </div>
+                </div>
+                <div class="color-picker" style="margin-top: 8px;">
+                    <label style="color: #aaaacc; font-size: 0.8rem;">Цвет:</label>
+                    <input type="color" id="partColor" value="#5a7a3a" />
+                    <button class="btn btn-secondary" onclick="resetColor()" style="flex: 0; padding: 4px 10px;">↺</button>
+                </div>
+            </div>
+            
+            <div class="section">
+                <div class="section-title">Действия</div>
+                <div class="btn-group">
+                    <button class="btn btn-danger" onclick="deleteSelected()">🗑️ Удалить</button>
+                    <button class="btn btn-secondary" onclick="clearAll()">🧹 Очистить</button>
+                    <button class="btn btn-primary" onclick="exportTank()">💾 Экспорт</button>
+                    <button class="btn btn-secondary" onclick="loadDefaultTank()">🔄 Сброс</button>
+                </div>
+            </div>
+            
+            <div class="section" style="flex: 1;">
+                <div class="section-title">Детали (<span id="partCount">0</span>)</div>
+                <div class="object-list" id="partList">
+                    <div class="empty-message">Нет деталей</div>
+                </div>
+            </div>
         </div>
     </div>
     
-    <!-- Контейнер -->
-    <div id="gameContainer">
-        <iframe id="gameFrame" src="editor.html" loading="lazy"></iframe>
-    </div>
-    
-    <!-- Индикатор режима -->
-    <div id="modeIndicator" class="editor-mode">
-        🛠️ РЕДАКТОР БЛОКОВ
-    </div>
-    
-    <!-- Огромная кнопка переключения -->
-    <button id="bigSwitch" class="switch-to-game" onclick="toggleMode()">
-        🎮 ПЕРЕЙТИ В ИГРУ
-    </button>
-    
-    <!-- Информация внизу -->
-    <div id="gameInfo">
-        <span id="infoText">🛠️ РЕДАКТОР БЛОКОВ: Добавляйте блоки, изменяйте размеры и позиции</span>
-    </div>
-    
-    <button id="toggleNav" onclick="toggleNav()">−</button>
-
-    <script>
-        let navVisible = true;
-        let currentMode = 'editor';
-        const navbar = document.getElementById('navbar');
-        const toggleBtn = document.getElementById('toggleNav');
-        const gameFrame = document.getElementById('gameFrame');
-        const statusText = document.getElementById('statusText');
-        const statusDot = document.getElementById('statusDot');
-        const statusBadge = document.getElementById('statusBadge');
-        const infoText = document.getElementById('infoText');
-        const modeIndicator = document.getElementById('modeIndicator');
-        const modeLabel = document.getElementById('modeLabel');
-        const bigSwitch = document.getElementById('bigSwitch');
-        const btnEditor = document.getElementById('btnEditor');
-        const btnGame = document.getElementById('btnGame');
-        
-        // Показываем большую кнопку
-        bigSwitch.style.display = 'block';
-        
-        function switchToEditor() {
-            if (currentMode === 'editor') return;
-            currentMode = 'editor';
-            gameFrame.src = 'editor.html';
-            
-            statusText.textContent = 'РЕДАКТОР';
-            statusDot.className = 'status-dot editor';
-            statusBadge.className = 'status-badge editor-mode';
-            infoText.textContent = '🛠️ РЕДАКТОР БЛОКОВ: Добавляйте блоки, изменяйте размеры и позиции';
-            modeIndicator.textContent = '🛠️ РЕДАКТОР БЛОКОВ';
-            modeIndicator.className = 'editor-mode';
-            modeLabel.textContent = '| Редактор';
-            bigSwitch.textContent = '🎮 ПЕРЕЙТИ В ИГРУ';
-            bigSwitch.className = 'switch-to-game';
-            
-            btnEditor.className = 'nav-btn editor-btn active-editor';
-            btnGame.className = 'nav-btn game-btn';
-        }
-        
-        function switchToGame() {
-            if (currentMode === 'game') return;
-            currentMode = 'game';
-            gameFrame.src = 'tank_1.html';
-            
-            statusText.textContent = 'ИГРА';
-            statusDot.className = 'status-dot game';
-            statusBadge.className = 'status-badge game-mode';
-            infoText.textContent = '🎮 Управление: WASD — движение | Стрелки — наклон башни | Пробел — выстрел';
-            modeIndicator.textContent = '🎮 ИГРА НА ТАНКЕ';
-            modeIndicator.className = 'game-mode';
-            modeLabel.textContent = '| Игра';
-            bigSwitch.textContent = '🛠️ ПЕРЕЙТИ В РЕДАКТОР';
-            bigSwitch.className = 'switch-to-editor';
-            
-            btnGame.className = 'nav-btn game-btn active-game';
-            btnEditor.className = 'nav-btn editor-btn';
-        }
-        
-        function toggleMode() {
-            if (currentMode === 'editor') {
-                switchToGame();
-            } else {
-                switchToEditor();
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.128.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.128.0/examples/jsm/"
             }
         }
+    </script>
+    
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
         
-        function reloadFrame() {
-            const container = document.getElementById('gameContainer');
-            container.style.opacity = '0.3';
-            container.style.transition = 'opacity 0.2s';
+        const viewport = document.getElementById('viewport');
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x1a1a2e);
+        
+        const camera = new THREE.PerspectiveCamera(45, viewport.clientWidth / viewport.clientHeight, 0.1, 100);
+        camera.position.set(8, 5, 10);
+        camera.lookAt(0, 0.5, 0);
+        
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(viewport.clientWidth, viewport.clientHeight);
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        renderer.setPixelRatio(window.devicePixelRatio);
+        viewport.appendChild(renderer.domElement);
+        
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.1;
+        controls.minDistance = 3;
+        controls.maxDistance = 30;
+        controls.target.set(0, 0.5, 0);
+        
+        // Свет
+        const ambient = new THREE.AmbientLight(0x404060, 0.6);
+        scene.add(ambient);
+        const mainLight = new THREE.DirectionalLight(0xffeedd, 1);
+        mainLight.position.set(10, 15, 5);
+        mainLight.castShadow = true;
+        mainLight.shadow.mapSize.width = 1024;
+        mainLight.shadow.mapSize.height = 1024;
+        scene.add(mainLight);
+        const fillLight = new THREE.DirectionalLight(0x4488ff, 0.3);
+        fillLight.position.set(-5, 5, -10);
+        scene.add(fillLight);
+        
+        // Пол
+        const gridHelper = new THREE.GridHelper(20, 20, 0xffaa00, 0x445566);
+        scene.add(gridHelper);
+        const groundMat = new THREE.ShadowMaterial({ opacity: 0.3 });
+        const groundPlane = new THREE.Mesh(new THREE.PlaneGeometry(20, 20), groundMat);
+        groundPlane.rotation.x = -Math.PI / 2;
+        groundPlane.position.y = -0.01;
+        groundPlane.receiveShadow = true;
+        scene.add(groundPlane);
+        
+        // Хранение деталей
+        const parts = [];
+        let selectedPart = null;
+        let partIdCounter = 0;
+        
+        // Создание детали
+        function createPart(type, color = '#5a7a3a', pos = { x: 0, y: 0.5, z: 0 }) {
+            let geometry, mesh;
+            const id = partIdCounter++;
             
-            setTimeout(() => {
-                gameFrame.src = gameFrame.src;
-                container.style.opacity = '1';
-            }, 200);
-        }
-        
-        function toggleFullscreen() {
-            if (!document.fullscreenElement) {
-                document.documentElement.requestFullscreen().catch(err => {
-                    console.log('Ошибка полноэкранного режима:', err);
-                });
-            } else {
-                if (document.exitFullscreen) {
-                    document.exitFullscreen();
-                }
+            switch(type) {
+                case 'корпус':
+                    geometry = new THREE.BoxGeometry(2.2, 0.6, 3.6);
+                    mesh = new THREE.Mesh(geometry, new THREE.MeshStandardMaterial({ color: color, roughness: 0.6, metalness: 0.3 }));
+                    break;
+                case 'башня':
+                    geometry = new THREE.CylinderGeometry(1.1, 1.3, 0.5, 16);
+                    mesh = new THREE.Mesh(geometry, new THREE.MeshStandardMaterial({ color: color, roughness: 0.5, metalness: 0.4 }));
+                    break;
+                case 'дуло':
+                    geometry = new THREE.CylinderGeometry(0.12, 0.16, 1.8, 8);
+                    mesh = new THREE.Mesh(geometry, new THREE.MeshStandardMaterial({ color: '#3a3a3a', roughness: 0.4, metalness: 0.7 }));
+                    mesh.rotation.x = Math.PI / 2;
+                    break;
+                case 'колесо':
+                    geometry = new THREE.CylinderGeometry(0.3, 0.3, 0.15, 12);
+                    mesh = new THREE.Mesh(geometry, new THREE.MeshStandardMaterial({ color: '#333333', roughness: 0.8 }));
+                    mesh.rotation.z = Math.PI / 2;
+                    break;
+                default:
+                    geometry = new THREE.BoxGeometry(1, 1, 1);
+                    mesh = new THREE.Mesh(geometry, new THREE.MeshStandardMaterial({ color: color }));
             }
+            
+            mesh.castShadow = true;
+            mesh.receiveShadow = true;
+            mesh.position.set(pos.x, pos.y, pos.z);
+            mesh.userData.type = type;
+            mesh.userData.id = id;
+            mesh.userData.name = `${type}_${id}`;
+            
+            scene.add(mesh);
+            
+            const partData = { mesh, id, type, name: mesh.userData.name };
+            parts.push(partData);
+            updateUI();
+            selectPart(partData);
+            return partData;
         }
         
-        function toggleNav() {
-            navVisible = !navVisible;
-            navbar.style.transform = navVisible ? 'translateY(0)' : 'translateY(-100%)';
-            toggleBtn.textContent = navVisible ? '−' : '+';
-        }
-        
-        // Авто-скрытие панели
-        let hoverTimeout;
-        document.addEventListener('mousemove', (e) => {
-            if (e.clientY < 50) {
-                clearTimeout(hoverTimeout);
-                if (!navVisible) {
-                    navbar.style.transform = 'translateY(0)';
-                    toggleBtn.textContent = '−';
-                    navVisible = true;
+        // Выбор детали
+        function selectPart(partData) {
+            selectedPart = partData;
+            updateProperties();
+            updateUI();
+            
+            parts.forEach(p => {
+                if (p.mesh.material._origEmissive === undefined) {
+                    p.mesh.material._origEmissive = p.mesh.material.emissive.clone();
                 }
-            } else if (navVisible && e.clientY > 100) {
-                hoverTimeout = setTimeout(() => {
-                    if (navVisible) {
-                        navbar.style.transform = 'translateY(-100%)';
-                        navVisible = false;
-                        toggleBtn.textContent = '+';
-                    }
-                }, 2000);
-            }
-        });
-        
-        toggleBtn.style.display = 'block';
-        
-        document.addEventListener('fullscreenchange', () => {
-            const isFull = document.fullscreenElement;
-            const btns = document.querySelectorAll('.nav-btn');
-            btns.forEach(btn => {
-                if (btn.textContent.includes('⛶') || btn.textContent.includes('⬛')) {
-                    btn.textContent = isFull ? '⬛' : '⛶';
-                }
+                p.mesh.material.emissive.setHex(0x000000);
             });
-        });
+            
+            if (partData) {
+                partData.mesh.material.emissive.setHex(0xffaa00);
+                partData.mesh.material.emissiveIntensity = 0.2;
+                document.getElementById('selectedName').textContent = partData.name;
+            }
+        }
         
-        gameFrame.addEventListener('error', () => {
-            document.getElementById('gameContainer').innerHTML = `
-                <div style="display: flex; justify-content: center; align-items: center; height: 100vh; 
-                     background: #0a0a1a; color: #ff6b6b; flex-direction: column; gap: 20px; padding: 20px;">
-                    <div style="font-size: 4rem;">⚠️</div>
-                    <h2>Не удалось загрузить файл</h2>
-                    <p style="color: #aaa; max-width: 500px; text-align: center;">
-                        Убедитесь, что файлы <strong style="color: #ffaa00;">editor.html</strong> и 
-                        <strong style="color: #ffaa00;">tank_1.html</strong> находятся в той же папке
-                    </p>
-                    <button onclick="location.reload()" style="padding: 10px 30px; background: #ffaa00; 
-                            border: none; border-radius: 8px; color: #0a0a1a; font-weight: bold; cursor: pointer; 
-                            font-size: 1.1rem;">
-                        🔄 Обновить
-                    </button>
+        // Обновление свойств
+        function updateProperties() {
+            if (!selectedPart) {
+                document.getElementById('selectedName').textContent = 'Ничего';
+                return;
+            }
+            
+            const mesh = selectedPart.mesh;
+            document.getElementById('selectedName').textContent = selectedPart.name;
+            
+            document.getElementById('sizeX').value = mesh.scale.x;
+            document.getElementById('sizeXVal').textContent = mesh.scale.x.toFixed(2);
+            document.getElementById('sizeY').value = mesh.scale.y;
+            document.getElementById('sizeYVal').textContent = mesh.scale.y.toFixed(2);
+            document.getElementById('sizeZ').value = mesh.scale.z;
+            document.getElementById('sizeZVal').textContent = mesh.scale.z.toFixed(2);
+            
+            document.getElementById('posX').value = mesh.position.x;
+            document.getElementById('posXVal').textContent = mesh.position.x.toFixed(2);
+            document.getElementById('posY').value = mesh.position.y;
+            document.getElementById('posYVal').textContent = mesh.position.y.toFixed(2);
+            document.getElementById('posZ').value = mesh.position.z;
+            document.getElementById('posZVal').textContent = mesh.position.z.toFixed(2);
+            
+            const rotY = THREE.MathUtils.radToDeg(mesh.rotation.y);
+            document.getElementById('rotY').value = rotY;
+            document.getElementById('rotYVal').textContent = `${Math.round(rotY)}°`;
+            
+            const color = mesh.material.color.getHexString();
+            document.getElementById('partColor').value = `#${color}`;
+        }
+        
+        function updateUI() {
+            const list = document.getElementById('partList');
+            const count = document.getElementById('partCount');
+            count.textContent = parts.length;
+            
+            if (parts.length === 0) {
+                list.innerHTML = '<div class="empty-message">Нет деталей</div>';
+                return;
+            }
+            
+            list.innerHTML = parts.map(p => `
+                <div class="object-item ${selectedPart && selectedPart.id === p.id ? 'selected' : ''}"
+                     onclick="window.selectPartById(${p.id})">
+                    <span>${p.type === 'колесо' ? '⚙️' : p.type === 'дуло' ? '🔫' : '📦'} ${p.name}</span>
+                    <button class="delete-btn" onclick="event.stopPropagation(); window.deletePart(${p.id})">✕</button>
                 </div>
-            `;
+            `).join('');
+        }
+        
+        // Глобальные функции
+        window.addPart = function(type) {
+            const colors = {
+                'корпус': '#5a7a3a',
+                'башня': '#6d8c4a',
+                'дуло': '#3a3a3a',
+                'колесо': '#333333'
+            };
+            const yOffsets = {
+                'корпус': 0.3,
+                'башня': 0.85,
+                'дуло': 1.05,
+                'колесо': 0.15
+            };
+            createPart(type, colors[type] || '#5a7a3a', { x: 0, y: yOffsets[type] || 0.5, z: 0 });
+        };
+        
+        window.selectPartById = function(id) {
+            const p = parts.find(o => o.id === id);
+            if (p) selectPart(p);
+        };
+        
+        window.deletePart = function(id) {
+            const index = parts.findIndex(p => p.id === id);
+            if (index === -1) return;
+            const p = parts[index];
+            scene.remove(p.mesh);
+            parts.splice(index, 1);
+            if (selectedPart && selectedPart.id === id) {
+                selectedPart = parts.length > 0 ? parts[0] : null;
+                if (selectedPart) selectPart(selectedPart);
+                else { selectedPart = null; updateProperties(); }
+            }
+            updateUI();
+        };
+        
+        window.deleteSelected = function() {
+            if (selectedPart) window.deletePart(selectedPart.id);
+        };
+        
+        window.clearAll = function() {
+            if (parts.length === 0) return;
+            if (!confirm('Удалить все детали?')) return;
+            parts.forEach(p => scene.remove(p.mesh));
+            parts.length = 0;
+            selectedPart = null;
+            updateUI();
+            updateProperties();
+        };
+        
+        window.resetColor = function() {
+            if (selectedPart) {
+                selectedPart.mesh.material.color.setHex(0x5a7a3a);
+                document.getElementById('partColor').value = '#5a7a3a';
+            }
+        };
+        
+        window.exportTank = function() {
+            const data = parts.map(p => ({
+                type: p.type,
+                position: p.mesh.position.toArray(),
+                scale: p.mesh.scale.toArray(),
+                rotation: [p.mesh.rotation.x, p.mesh.rotation.y, p.mesh.rotation.z],
+                color: p.mesh.material.color.getHexString()
+            }));
+            const json = JSON.stringify(data, null, 2);
+            const blob = new Blob([json], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'tank_parts.json';
+            a.click();
+            URL.revokeObjectURL(url);
+        };
+        
+        // Загрузка стандартного танка
+        window.loadDefaultTank = function() {
+            clearAll();
+            
+            // Корпус
+            const body = createPart('корпус', '#5a7a3a', { x: 0, y: 0.3, z: 0 });
+            body.mesh.scale.set(1, 1, 1);
+            
+            // Башня
+            const turret = createPart('башня', '#6d8c4a', { x: 0, y: 0.85, z: 0 });
+            turret.mesh.scale.set(1, 1, 1);
+            
+            // Дуло
+            const barrel = createPart('дуло', '#3a3a3a', { x: 0, y: 1.05, z: 0.6 });
+            barrel.mesh.rotation.x = Math.PI / 2;
+            
+            // Колеса
+            for (let side = -1; side <= 1; side += 2) {
+                for (let i = -1; i <= 1; i++) {
+                    const wheel = createPart('колесо', '#333333', { x: side * 1.35, y: 0.15, z: i * 1.2 });
+                    wheel.mesh.scale.set(0.8, 0.8, 0.8);
+                }
+            }
+            
+            // Выбираем корпус
+            selectPart(body);
+        };
+        
+        // Настройка слайдеров
+        function setupSlider(id, callback) {
+            const input = document.getElementById(id);
+            input.addEventListener('input', () => {
+                const val = parseFloat(input.value);
+                const valDisplay = document.getElementById(id + 'Val');
+                if (valDisplay) {
+                    if (id.includes('rot')) {
+                        valDisplay.textContent = `${Math.round(val)}°`;
+                    } else {
+                        valDisplay.textContent = val.toFixed(2);
+                    }
+                }
+                callback(val);
+            });
+        }
+        
+        setupSlider('sizeX', (val) => { if (selectedPart) selectedPart.mesh.scale.x = val; });
+        setupSlider('sizeY', (val) => { if (selectedPart) selectedPart.mesh.scale.y = val; });
+        setupSlider('sizeZ', (val) => { if (selectedPart) selectedPart.mesh.scale.z = val; });
+        setupSlider('posX', (val) => { if (selectedPart) selectedPart.mesh.position.x = val; });
+        setupSlider('posY', (val) => { if (selectedPart) selectedPart.mesh.position.y = val; });
+        setupSlider('posZ', (val) => { if (selectedPart) selectedPart.mesh.position.z = val; });
+        setupSlider('rotY', (val) => { if (selectedPart) selectedPart.mesh.rotation.y = THREE.MathUtils.degToRad(val); });
+        
+        document.getElementById('partColor').addEventListener('input', (e) => {
+            if (selectedPart) selectedPart.mesh.material.color.set(e.target.value);
         });
         
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'F5') {
-                e.preventDefault();
-                reloadFrame();
-            }
-            if (e.ctrlKey && e.key === '1') {
-                e.preventDefault();
-                switchToEditor();
-            }
-            if (e.ctrlKey && e.key === '2') {
-                e.preventDefault();
-                switchToGame();
-            }
-            if (e.key === 'Tab') {
-                e.preventDefault();
-                toggleMode();
+        // Клик по сцене для выбора
+        const raycaster = new THREE.Raycaster();
+        const mouse = new THREE.Vector2();
+        renderer.domElement.addEventListener('click', (event) => {
+            const rect = renderer.domElement.getBoundingClientRect();
+            mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+            mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+            raycaster.setFromCamera(mouse, camera);
+            const meshes = parts.map(p => p.mesh);
+            const intersects = raycaster.intersectObjects(meshes);
+            if (intersects.length > 0) {
+                const hitMesh = intersects[0].object;
+                const partData = parts.find(p => p.mesh === hitMesh);
+                if (partData) selectPart(partData);
             }
         });
         
-        console.log('✅ index.html загружен!');
-        console.log('🛠️ Редактор: editor.html (открыт по умолчанию)');
-        console.log('🎮 Игра: tank_1.html');
-        console.log('⌨️ Ctrl+1 - редактор, Ctrl+2 - игра, Tab - переключение');
-        console.log('📁 Убедитесь, что оба файла находятся в той же папке');
+        // Анимация
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            renderer.render(scene, camera);
+        }
+        animate();
+        
+        window.addEventListener('resize', () => {
+            const w = viewport.clientWidth;
+            const h = viewport.clientHeight;
+            camera.aspect = w / h;
+            camera.updateProjectionMatrix();
+            renderer.setSize(w, h);
+        });
+        
+        // Загружаем танк по умолчанию
+        setTimeout(loadDefaultTank, 100);
+        
+        console.log('🛠️ Редактор танка загружен!');
+        console.log('🎯 Кликайте по деталям для редактирования');
     </script>
 </body>
 </html>
