@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Редактор блоков танка</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: #0a0a1a;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: white;
+            overflow: hidden;
+            height: 100vh;
+        }
+        
+        #app {
+            display: flex;
+            height: 100vh;
+        }
+        
+        /* 3D сцена */
+        #viewport {
+            flex: 1;
+            position: relative;
+            background: #1a1a2e;
+            overflow: hidden;
+        }
+        
+        #viewport canvas {
+            display: block;
+            width: 100% !important;
+            height: 100% !important;
+        }
+        
+        /* Информация о выделенном объекте */
+        #selectionInfo {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(0,0,0,0.8);
+            padding: 12px 20px;
+            border-radius: 10px;
+            border-left: 3px solid #ffaa00;
+            pointer-events: none;
+            font-size: 0.9rem;
+            backdrop-filter: blur(4px);
+        }
+        
+        #selectionInfo span {
+            color: #ffaa00;
+            font-weight: bold;
+        }
+        
+        /* Панель инструментов */
+        #toolbar {
+            width: 320px;
+            background: rgba(20, 20, 40, 0.95);
+            backdrop-filter: blur(10px);
+            border-left: 2px solid #2a2a4a;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        
+        #toolbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        #toolbar::-webkit-scrollbar-track {
+            background: rgba(0,0,0,0.2);
+        }
+        
+        #toolbar::-webkit-scrollbar-thumb {
+            background: #ffaa00;
+            border-radius: 3px;
+        }
+        
+        .toolbar-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #ffaa00;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #2a2a4a;
+        }
+        
+        .section {
+            background: rgba(255,255,255,0.03);
+            border-radius: 10px;
+            padding: 14px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        
+        .section-title {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            color: #8888aa;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+        
+        .btn-group {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex: 1;
+            justify-content: center;
+            min-width: 60px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(255,170,0,0.3);
+        }
+        
+        .btn:active {
+            transform: scale(0.95);
+        }
+        
+        .btn-primary {
+            background: #ffaa00;
+            color: #0a0a1a;
+        }
+        
+        .btn-primary:hover {
+            background: #ffbb22;
+        }
+        
+        .btn-danger {
+            background: #cc3344;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: #dd4455;
+        }
+        
+        .btn-success {
+            background: #2d8a4e;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #3a9a5e;
+        }
+        
+        .btn-secondary {
+            background: rgba(255,255,255,0.1);
+            color: #aaa;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .btn-secondary:hover {
+            background: rgba(255,255,255,0.15);
+            color: white;
+        }
+        
+        .btn-outline {
+            background: transparent;
+            color: #ffaa00;
+            border: 2px solid #ffaa00;
+        }
+        
+        .btn-outline:hover {
+            background: #ffaa00;
+            color: #0a0a1a;
+        }
+        
+        /* Слайдеры */
+        .slider-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .slider-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        
+        .slider-item label {
+            font-size: 0.8rem;
+            color: #aaaacc;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .slider-item label span {
+            color: #ffaa00;
+            font-weight: 600;
+        }
+        
+        input[type="range"] {
+            width: 100%;
+            height: 6px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: #2a2a4a;
+            border-radius: 3px;
+            outline: none;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #ffaa00;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(255,170,0,0.3);
+        }
+        
+        input[type="range"]::-moz-range-thumb {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #ffaa00;
+            cursor: pointer;
+            border: none;
+        }
+        
+        .color-picker {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .color-picker input[type="color"] {
+            width: 40px;
+            height: 40px;
+            border: 2px solid #2a2a4a;
+            border-radius: 8px;
+            cursor: pointer;
+            background: transparent;
+            padding: 2px;
+        }
+        
+        .color-picker input[type="color"]::-webkit-color-swatch-wrapper {
+            padding: 0;
+        }
+        
+        .color-picker input[type="color"]::-webkit-color-swatch {
+            border: none;
+            border-radius: 6px;
+        }
+        
+        /* Список объектов */
+        .object-list {
+            max-height: 150px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        
+        .object-list::-webkit-scrollbar {
+            width: 4px;
+        }
+        
+        .object-list::-webkit-scrollbar-thumb {
+            background: #ffaa00;
+            border-radius: 2px;
+        }
+        
+        .object-item {
+            padding: 6px 10px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+            border: 1px solid transparent;
+        }
+        
+        .object-item:hover {
+            background: rgba(255,255,255,0.1);
+        }
+        
+        .object-item.selected {
+            border-color: #ffaa00;
+            background: rgba(255,170,0,0.1);
+        }
+        
+        .object-item .delete-btn {
+            background: none;
+            border: none;
+            color: #cc3344;
+            cursor: pointer;
+            font-size: 1rem;
+            padding: 0 4px;
+        }
+        
+        .object-item .delete-btn:hover {
+            color: #ff4455;
+        }
+        
+        .empty-message {
+            color: #666688;
+            font-size: 0.85rem;
+            text-align: center;
+            padding: 20px 0;
+        }
+        
+        /* Адаптивность */
+        @media (max-width: 768px) {
+            #app {
+                flex-direction: column;
+            }
+            
+            #toolbar {
+                width: 100%;
+                max-height: 50vh;
+                border-left: none;
+                border-top: 2px solid #2a2a4a;
+            }
+            
+            #viewport {
+                height: 50vh;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            #toolbar {
+                padding: 12px;
+                gap: 10px;
+            }
+            
+            .btn {
+                font-size: 0.75rem;
+                padding: 6px 10px;
+            }
+            
+            .section {
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <!-- 3D вьюпорт -->
+        <div id="viewport">
+            <div id="selectionInfo">
+                Выделено: <span id="selectedName">Ничего</span>
+                <span style="margin-left: 15px; color: #8888aa;">|</span>
+                <span style="color: #8888aa;">Клик по объекту для выбора</span>
+            </div>
+        </div>
+        
+        <!-- Панель инструментов -->
+        <div id="toolbar">
+            <div class="toolbar-title">
+                🛠️ Редактор блоков
+            </div>
+            
+            <!-- Добавление блоков -->
+            <div class="section">
+                <div class="section-title">Добавить блок</div>
+                <div class="btn-group">
+                    <button class="btn btn-success" onclick="addBlock('cube')">📦 Куб</button>
+                    <button class="btn btn-success" onclick="addBlock('wheel')">⚙️ Колесо</button>
+                    <button class="btn btn-success" onclick="addBlock('cylinder')">🧊 Цилиндр</button>
+                </div>
+            </div>
+            
+            <!-- Настройки выделенного объекта -->
+            <div class="section" id="propertiesSection">
+                <div class="section-title">Свойства объекта</div>
+                
+                <div class="slider-group">
+                    <div class="slider-item">
+                        <label>Длина (X) <span id="sizeXVal">1.00</span></label>
+                        <input type="range" id="sizeX" min="0.2" max="4" step="0.05" value="1" />
+                    </div>
+                    <div class="slider-item">
+                        <label>Высота (Y) <span id="sizeYVal">1.00</span></label>
+                        <input type="range" id="sizeY" min="0.2" max="4" step="0.05" value="1" />
+                    </div>
+                    <div class="slider-item">
+                        <label>Глубина (Z) <span id="sizeZVal">1.00</span></label>
+                        <input type="range" id="sizeZ" min="0.2" max="4" step="0.05" value="1" />
+                    </div>
+                    <div class="slider-item">
+                        <label>Позиция X <span id="posXVal">0.00</span></label>
+                        <input type="range" id="posX" min="-10" max="10" step="0.1" value="0" />
+                    </div>
+                    <div class="slider-item">
+                        <label>Позиция Y <span id="posYVal">0.00</span></label>
+                        <input type="range" id="posY" min="-5" max="10" step="0.1" value="0" />
+                    </div>
+                    <div class="slider-item">
+                        <label>Позиция Z <span id="posZVal">0.00</span></label>
+                        <input type="range" id="posZ" min="-10" max="10" step="0.1" value="0" />
+                    </div>
+                    <div class="slider-item">
+                        <label>Поворот Y <span id="rotYVal">0°</span></label>
+                        <input type="range" id="rotY" min="-180" max="180" step="1" value="0" />
+                    </div>
+                </div>
+                
+                <div class="color-picker" style="margin-top: 10px;">
+                    <label style="color: #aaaacc; font-size: 0.85rem;">Цвет:</label>
+                    <input type="color" id="objectColor" value="#5a7a3a" />
+                    <button class="btn btn-secondary" onclick="resetColor()" style="flex: 0; padding: 6px 12px;">↺</button>
+                </div>
+            </div>
+            
+            <!-- Действия -->
+            <div class="section">
+                <div class="section-title">Действия</div>
+                <div class="btn-group">
+                    <button class="btn btn-danger" onclick="deleteSelected()">🗑️ Удалить</button>
+                    <button class="btn btn-secondary" onclick="clearAll()">🧹 Очистить всё</button>
+                    <button class="btn btn-primary" onclick="exportScene()">💾 Экспорт</button>
+                </div>
+            </div>
+            
+            <!-- Список объектов -->
+            <div class="section" style="flex: 1;">
+                <div class="section-title">Объекты (<span id="objectCount">0</span>)</div>
+                <div class="object-list" id="objectList">
+                    <div class="empty-message">Нет объектов</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.128.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.128.0/examples/jsm/"
+            }
+        }
+    </script>
+    
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+        
+        // --- Настройка сцены ---
+        const viewport = document.getElementById('viewport');
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x1a1a2e);
+        
+        const camera = new THREE.PerspectiveCamera(45, viewport.clientWidth / viewport.clientHeight, 0.1, 100);
+        camera.position.set(6, 5, 8);
+        camera.lookAt(0, 0, 0);
+        
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(viewport.clientWidth, viewport.clientHeight);
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        renderer.setPixelRatio(window.devicePixelRatio);
+        viewport.appendChild(renderer.domElement);
+        
+        // --- Контролы ---
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.1;
+        controls.minDistance = 3;
+        controls.maxDistance = 30;
+        controls.target.set(0, 0.5, 0);
+        
+        // --- Свет ---
+        const ambient = new THREE.AmbientLight(0x404060, 0.6);
+        scene.add(ambient);
+        
+        const mainLight = new THREE.DirectionalLight(0xffeedd, 1);
+        mainLight.position.set(10, 15, 5);
+        mainLight.castShadow = true;
+        mainLight.shadow.mapSize.width = 1024;
+        mainLight.shadow.mapSize.height = 1024;
+        scene.add(mainLight);
+        
+        const fillLight = new THREE.DirectionalLight(0x4488ff, 0.3);
+        fillLight.position.set(-5, 5, -10);
+        scene.add(fillLight);
+        
+        // --- Пол ---
+        const gridHelper = new THREE.GridHelper(20, 20, 0xffaa00, 0x445566);
+        scene.add(gridHelper);
+        
+        // --- Хранение объектов ---
+        const objects = [];
+        let selectedObject = null;
+        let objectIdCounter = 0;
+        
+        // --- Функции создания блоков ---
+        function createBlock(type, color = '#5a7a3a') {
+            let geometry, mesh;
+            const id = objectIdCounter++;
+            
+            switch(type) {
+                case 'cube':
+                    geometry = new THREE.BoxGeometry(1, 1, 1);
+                    mesh = new THREE.Mesh(geometry, new THREE.MeshStandardMaterial({ color: color }));
+                    mesh.userData.isWheel = false;
+                    break;
+                case 'wheel':
+                    geometry = new THREE.CylinderGeometry(0.5, 0.5, 0.3, 16);
+                    mesh = new THREE.Mesh(geometry, new THREE.MeshStandardMaterial({ color: '#333333' }));
+                    mesh.userData.isWheel = true;
+                    mesh.rotation.x = Math.PI / 2;
+                    break;
+                case 'cylinder':
+                    geometry = new THREE.CylinderGeometry(0.5, 0.5, 1, 12);
+                    mesh = new THREE.Mesh(geometry, new THREE.MeshStandardMaterial({ color: color }));
+                    mesh.userData.isWheel = false;
+                    break;
+                default:
+                    geometry = new THREE.BoxGeometry(1, 1, 1);
+                    mesh = new THREE.Mesh(geometry, new THREE.MeshStandardMaterial({ color: color }));
+                    mesh.userData.isWheel = false;
+            }
+            
+            mesh.castShadow = true;
+            mesh.receiveShadow = true;
+            mesh.userData.type = type;
+            mesh.userData.id = id;
+            mesh.userData.name = `${type}_${id}`;
+            
+            // Позиционируем на полу
+            mesh.position.y = type === 'wheel' ? 0.5 : 0.5;
+            
+            scene.add(mesh);
+            
+            const objData = {
+                mesh: mesh,
+                id: id,
+                type: type,
+                name: mesh.userData.name
+            };
+            
+            objects.push(objData);
+            updateUI();
+            selectObject(objData);
+            
+            return objData;
+        }
+        
+        // --- Выбор объекта ---
+        function selectObject(objData) {
+            selectedObject = objData;
+            updateProperties();
+            updateUI();
+            
+            // Визуальное выделение
+            objects.forEach(o => {
+                if (o.mesh.material._origEmissive === undefined) {
+                    o.mesh.material._origEmissive = o.mesh.material.emissive.clone();
+                }
+                o.mesh.material.emissive.setHex(0x000000);
+            });
+            
+            if (objData) {
+                objData.mesh.material.emissive.setHex(0xffaa00);
+                objData.mesh.material.emissiveIntensity = 0.2;
+            }
+        }
+        
+        // --- Обновление свойств в UI ---
+        function updateProperties() {
+            if (!selectedObject) {
+                document.getElementById('selectedName').textContent = 'Ничего';
+                return;
+            }
+            
+            const mesh = selectedObject.mesh;
+            document.getElementById('selectedName').textContent = selectedObject.name;
+            
+            // Размеры
+            const scale = mesh.scale;
+            document.getElementById('sizeX').value = scale.x;
+            document.getElementById('sizeXVal').textContent = scale.x.toFixed(2);
+            document.getElementById('sizeY').value = scale.y;
+            document.getElementById('sizeYVal').textContent = scale.y.toFixed(2);
+            document.getElementById('sizeZ').value = scale.z;
+            document.getElementById('sizeZVal').textContent = scale.z.toFixed(2);
+            
+            // Позиция
+            document.getElementById('posX').value = mesh.position.x;
+            document.getElementById('posXVal').textContent = mesh.position.x.toFixed(2);
+            document.getElementById('posY').value = mesh.position.y;
+            document.getElementById('posYVal').textContent = mesh.position.y.toFixed(2);
+            document.getElementById('posZ').value = mesh.position.z;
+            document.getElementById('posZVal').textContent = mesh.position.z.toFixed(2);
+            
+            // Поворот
+            const rotY = THREE.MathUtils.radToDeg(mesh.rotation.y);
+            document.getElementById('rotY').value = rotY;
+            document.getElementById('rotYVal').textContent = `${Math.round(rotY)}°`;
+            
+            // Цвет
+            const color = mesh.material.color.getHexString();
+            document.getElementById('objectColor').value = `#${color}`;
+        }
+        
+        // --- Обновление списка объектов ---
+        function updateUI() {
+            const list = document.getElementById('objectList');
+            const count = document.getElementById('objectCount');
+            count.textContent = objects.length;
+            
+            if (objects.length === 0) {
+                list.innerHTML = '<div class="empty-message">Нет объектов</div>';
+                return;
+            }
+            
+            list.innerHTML = objects.map(obj => `
+                <div class="object-item ${selectedObject && selectedObject.id === obj.id ? 'selected' : ''}"
+                     onclick="window.selectObjectById(${obj.id})">
+                    <span>${obj.type === 'wheel' ? '⚙️' : '📦'} ${obj.name}</span>
+                    <button class="delete-btn" onclick="event.stopPropagation(); window.deleteObject(${obj.id})">✕</button>
+                </div>
+            `).join('');
+        }
+        
+        // --- Глобальные функции для доступа из HTML ---
+        window.addBlock = function(type) {
+            createBlock(type);
+        };
+        
+        window.deleteObject = function(id) {
+            const index = objects.findIndex(o => o.id === id);
+            if (index === -1) return;
+            
+            const obj = objects[index];
+            scene.remove(obj.mesh);
+            objects.splice(index, 1);
+            
+            if (selectedObject && selectedObject.id === id) {
+                selectedObject = objects.length > 0 ? objects[0] : null;
+                if (selectedObject) selectObject(selectedObject);
+                else {
+                    selectedObject = null;
+                    updateProperties();
+                }
+            }
+            
+            updateUI();
+        };
+        
+        window.selectObjectById = function(id) {
+            const obj = objects.find(o => o.id === id);
+            if (obj) selectObject(obj);
+        };
+        
+        window.deleteSelected = function() {
+            if (selectedObject) {
+                window.deleteObject(selectedObject.id);
+            }
+        };
+        
+        window.clearAll = function() {
+            if (objects.length === 0) return;
+            if (!confirm('Удалить все объекты?')) return;
+            
+            objects.forEach(obj => scene.remove(obj.mesh));
+            objects.length = 0;
+            selectedObject = null;
+            updateUI();
+            updateProperties();
+        };
+        
+        window.resetColor = function() {
+            if (selectedObject) {
+                selectedObject.mesh.material.color.setHex(0x5a7a3a);
+                document.getElementById('objectColor').value = '#5a7a3a';
+            }
+        };
+        
+        window.exportScene = function() {
+            const data = objects.map(obj => ({
+                type: obj.type,
+                position: obj.mesh.position.toArray(),
+                scale: obj.mesh.scale.toArray(),
+                rotation: [obj.mesh.rotation.x, obj.mesh.rotation.y, obj.mesh.rotation.z],
+                color: obj.mesh.material.color.getHexString(),
+                isWheel: obj.mesh.userData.isWheel || false
+            }));
+            
+            const json = JSON.stringify(data, null, 2);
+            const blob = new Blob([json], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'tank_blocks.json';
+            a.click();
+            URL.revokeObjectURL(url);
+        };
+        
+        // --- Связывание слайдеров ---
+        function setupSlider(id, callback) {
+            const input = document.getElementById(id);
+            input.addEventListener('input', () => {
+                const val = parseFloat(input.value);
+                const valDisplay = document.getElementById(id + 'Val');
+                if (valDisplay) {
+                    if (id.includes('rot')) {
+                        valDisplay.textContent = `${Math.round(val)}°`;
+                    } else {
+                        valDisplay.textContent = val.toFixed(2);
+                    }
+                }
+                callback(val);
+            });
+        }
+        
+        setupSlider('sizeX', (val) => {
+            if (selectedObject) {
+                selectedObject.mesh.scale.x = val;
+            }
+        });
+        
+        setupSlider('sizeY', (val) => {
+            if (selectedObject) {
+                selectedObject.mesh.scale.y = val;
+            }
+        });
+        
+        setupSlider('sizeZ', (val) => {
+            if (selectedObject) {
+                selectedObject.mesh.scale.z = val;
+            }
+        });
+        
+        setupSlider('posX', (val) => {
+            if (selectedObject) {
+                selectedObject.mesh.position.x = val;
+            }
+        });
+        
+        setupSlider('posY', (val) => {
+            if (selectedObject) {
+                selectedObject.mesh.position.y = val;
+            }
+        });
+        
+        setupSlider('posZ', (val) => {
+            if (selectedObject) {
+                selectedObject.mesh.position.z = val;
+            }
+        });
+        
+        setupSlider('rotY', (val) => {
+            if (selectedObject) {
+                selectedObject.mesh.rotation.y = THREE.MathUtils.degToRad(val);
+            }
+        });
+        
+        // --- Цвет ---
+        document.getElementById('objectColor').addEventListener('input', (e) => {
+            if (selectedObject) {
+                selectedObject.mesh.material.color.set(e.target.value);
+            }
+        });
+        
+        // --- Raycaster для выбора кликом ---
+        const raycaster = new THREE.Raycaster();
+        const mouse = new THREE.Vector2();
+        
+        renderer.domElement.addEventListener('click', (event) => {
+            const rect = renderer.domElement.getBoundingClientRect();
+            mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+            mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+            
+            raycaster.setFromCamera(mouse, camera);
+            
+            const meshes = objects.map(o => o.mesh);
+            const intersects = raycaster.intersectObjects(meshes);
+            
+            if (intersects.length > 0) {
+                const hitMesh = intersects[0].object;
+                const objData = objects.find(o => o.mesh === hitMesh);
+                if (objData) selectObject(objData);
+            } else {
+                // Снимаем выделение
+                if (selectedObject) {
+                    selectedObject.mesh.material.emissive.setHex(0x000000);
+                    selectedObject = null;
+                    updateProperties();
+                    updateUI();
+                }
+            }
+        });
+        
+        // --- Анимация ---
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            renderer.render(scene, camera);
+        }
+        animate();
+        
+        // --- Адаптация размера ---
+        window.addEventListener('resize', () => {
+            const w = viewport.clientWidth;
+            const h = viewport.clientHeight;
+            camera.aspect = w / h;
+            camera.updateProjectionMatrix();
+            renderer.setSize(w, h);
+        });
+        
+        // Создаем стартовые блоки для примера
+        setTimeout(() => {
+            const block1 = createBlock('cube', '#5a7a3a');
+            block1.mesh.position.set(-1.5, 0.5, 0);
+            
+            const block2 = createBlock('cube', '#4a6a2a');
+            block2.mesh.position.set(1.5, 0.5, 0);
+            block2.mesh.scale.set(1, 0.8, 2);
+            
+            const wheel1 = createBlock('wheel');
+            wheel1.mesh.position.set(-1, 0.3, 1.5);
+            
+            const wheel2 = createBlock('wheel');
+            wheel2.mesh.position.set(1, 0.3, 1.5);
+            
+            // Выбираем первый блок
+            selectObject(block1);
+        }, 100);
+        
+        console.log('🛠️ Редактор блоков загружен!');
+        console.log('📦 Добавляйте блоки, изменяйте размеры и позиции.');
+    </script>
+</body>
+</html>
