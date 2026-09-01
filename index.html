@@ -41,7 +41,7 @@
             left: 0;
             right: 0;
             z-index: 100;
-            background: rgba(10, 10, 30, 0.9);
+            background: rgba(10, 10, 30, 0.95);
             backdrop-filter: blur(12px);
             padding: 12px 24px;
             display: flex;
@@ -97,48 +97,52 @@
             box-shadow: 0 6px 25px rgba(255, 170, 0, 0.3);
         }
         
-        .nav-btn.active {
-            background: #ffaa00;
-            color: #0a0a1a;
-            box-shadow: 0 0 30px rgba(255, 170, 0, 0.4);
-        }
-        
-        .nav-btn.editor-btn.active {
+        .nav-btn.active-editor {
             background: #44aa44;
             border-color: #44aa44;
             color: white;
-            box-shadow: 0 0 30px rgba(68, 170, 68, 0.4);
+            box-shadow: 0 0 30px rgba(68, 170, 68, 0.5);
         }
         
-        .nav-btn.game-btn.active {
+        .nav-btn.active-game {
             background: #ff6600;
             border-color: #ff6600;
             color: white;
-            box-shadow: 0 0 30px rgba(255, 102, 0, 0.4);
+            box-shadow: 0 0 30px rgba(255, 102, 0, 0.5);
         }
         
         .nav-btn.editor-btn {
             border-color: #44aa44;
             color: #88ff88;
-            background: rgba(68, 170, 68, 0.1);
+            background: rgba(68, 170, 68, 0.15);
         }
         
         .nav-btn.game-btn {
             border-color: #ff6600;
             color: #ff8844;
-            background: rgba(255, 102, 0, 0.1);
+            background: rgba(255, 102, 0, 0.15);
         }
         
         .status-badge {
-            color: #88ff88;
-            font-size: 0.8rem;
             display: flex;
             align-items: center;
             gap: 8px;
-            background: rgba(0, 255, 0, 0.08);
             padding: 6px 16px;
             border-radius: 25px;
-            border: 1px solid rgba(68, 170, 68, 0.3);
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        
+        .status-badge.editor-mode {
+            background: rgba(68, 170, 68, 0.15);
+            border: 1px solid #44aa44;
+            color: #88ff88;
+        }
+        
+        .status-badge.game-mode {
+            background: rgba(255, 102, 0, 0.15);
+            border: 1px solid #ff6600;
+            color: #ff8844;
         }
         
         .status-dot {
@@ -161,7 +165,6 @@
             50% { opacity: 0.5; transform: scale(0.8); }
         }
         
-        /* Кнопка скрытия панели */
         #toggleNav {
             position: fixed;
             top: 10px;
@@ -183,7 +186,6 @@
             color: #0a0a1a;
         }
         
-        /* Информация внизу */
         #gameInfo {
             position: fixed;
             bottom: 20px;
@@ -193,13 +195,12 @@
             color: rgba(255,255,255,0.6);
             font-size: 0.85rem;
             text-align: center;
-            background: rgba(0,0,0,0.6);
+            background: rgba(0,0,0,0.7);
             padding: 8px 24px;
             border-radius: 30px;
             backdrop-filter: blur(6px);
             pointer-events: none;
             border: 1px solid rgba(255,255,255,0.05);
-            white-space: nowrap;
         }
         
         #modeIndicator {
@@ -207,13 +208,14 @@
             top: 80px;
             right: 20px;
             z-index: 50;
-            padding: 10px 20px;
+            padding: 12px 24px;
             border-radius: 12px;
             font-weight: 700;
-            font-size: 1.1rem;
+            font-size: 1.2rem;
             backdrop-filter: blur(8px);
             pointer-events: none;
             animation: slideIn 0.5s ease;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
         }
         
         @keyframes slideIn {
@@ -222,18 +224,52 @@
         }
         
         #modeIndicator.editor-mode {
-            background: rgba(68, 170, 68, 0.2);
+            background: rgba(68, 170, 68, 0.25);
             border: 2px solid #44aa44;
             color: #88ff88;
+            text-shadow: 0 0 20px rgba(68, 170, 68, 0.3);
         }
         
         #modeIndicator.game-mode {
-            background: rgba(255, 102, 0, 0.2);
+            background: rgba(255, 102, 0, 0.25);
             border: 2px solid #ff6600;
             color: #ff8844;
+            text-shadow: 0 0 20px rgba(255, 102, 0, 0.3);
         }
         
-        /* Адаптивность */
+        /* Огромная кнопка переключения */
+        #bigSwitch {
+            position: fixed;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 60;
+            padding: 15px 40px;
+            border-radius: 50px;
+            font-size: 1.3rem;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            box-shadow: 0 4px 30px rgba(0,0,0,0.7);
+            letter-spacing: 1px;
+            display: none;
+        }
+        
+        #bigSwitch:hover {
+            transform: translateX(-50%) scale(1.05);
+        }
+        
+        #bigSwitch.switch-to-editor {
+            background: #44aa44;
+            color: white;
+        }
+        
+        #bigSwitch.switch-to-game {
+            background: #ff6600;
+            color: white;
+        }
+        
         @media (max-width: 768px) {
             #navbar {
                 padding: 8px 12px;
@@ -263,7 +299,6 @@
                 font-size: 0.6rem;
                 padding: 4px 12px;
                 bottom: 10px;
-                white-space: normal;
             }
             
             #modeIndicator {
@@ -272,20 +307,11 @@
                 font-size: 0.8rem;
                 padding: 6px 12px;
             }
-        }
-        
-        @media (max-width: 480px) {
-            .nav-controls .nav-btn:not(.active) {
-                display: none;
-            }
             
-            .nav-controls .nav-btn.active {
-                font-size: 0.7rem;
-                padding: 4px 10px;
-            }
-            
-            .status-badge span:last-child {
-                display: none;
+            #bigSwitch {
+                padding: 10px 25px;
+                font-size: 1rem;
+                bottom: 60px;
             }
         }
     </style>
@@ -300,11 +326,11 @@
         </div>
         
         <div class="nav-controls">
-            <div class="status-badge">
+            <div class="status-badge editor-mode" id="statusBadge">
                 <span class="status-dot editor" id="statusDot"></span>
-                <span id="statusText">Редактор</span>
+                <span id="statusText">РЕДАКТОР</span>
             </div>
-            <button class="nav-btn editor-btn active" id="btnEditor" onclick="switchToEditor()">
+            <button class="nav-btn editor-btn active-editor" id="btnEditor" onclick="switchToEditor()">
                 🛠️ Редактор
             </button>
             <button class="nav-btn game-btn" id="btnGame" onclick="switchToGame()">
@@ -326,12 +352,17 @@
     
     <!-- Индикатор режима -->
     <div id="modeIndicator" class="editor-mode">
-        🛠️ РЕДАКТОР
+        🛠️ РЕДАКТОР БЛОКОВ
     </div>
+    
+    <!-- Огромная кнопка переключения -->
+    <button id="bigSwitch" class="switch-to-game" onclick="toggleMode()">
+        🎮 ПЕРЕЙТИ В ИГРУ
+    </button>
     
     <!-- Информация внизу -->
     <div id="gameInfo">
-        <span id="infoText">🛠️ Редактор блоков: добавляйте блоки, изменяйте размеры и позиции</span>
+        <span id="infoText">🛠️ РЕДАКТОР БЛОКОВ: Добавляйте блоки, изменяйте размеры и позиции</span>
     </div>
     
     <button id="toggleNav" onclick="toggleNav()">−</button>
@@ -344,25 +375,33 @@
         const gameFrame = document.getElementById('gameFrame');
         const statusText = document.getElementById('statusText');
         const statusDot = document.getElementById('statusDot');
+        const statusBadge = document.getElementById('statusBadge');
         const infoText = document.getElementById('infoText');
         const modeIndicator = document.getElementById('modeIndicator');
         const modeLabel = document.getElementById('modeLabel');
+        const bigSwitch = document.getElementById('bigSwitch');
         const btnEditor = document.getElementById('btnEditor');
         const btnGame = document.getElementById('btnGame');
+        
+        // Показываем большую кнопку
+        bigSwitch.style.display = 'block';
         
         function switchToEditor() {
             if (currentMode === 'editor') return;
             currentMode = 'editor';
             gameFrame.src = 'editor.html';
             
-            statusText.textContent = 'Редактор';
+            statusText.textContent = 'РЕДАКТОР';
             statusDot.className = 'status-dot editor';
-            infoText.textContent = '🛠️ Редактор блоков: добавляйте блоки, изменяйте размеры и позиции';
-            modeIndicator.textContent = '🛠️ РЕДАКТОР';
+            statusBadge.className = 'status-badge editor-mode';
+            infoText.textContent = '🛠️ РЕДАКТОР БЛОКОВ: Добавляйте блоки, изменяйте размеры и позиции';
+            modeIndicator.textContent = '🛠️ РЕДАКТОР БЛОКОВ';
             modeIndicator.className = 'editor-mode';
             modeLabel.textContent = '| Редактор';
+            bigSwitch.textContent = '🎮 ПЕРЕЙТИ В ИГРУ';
+            bigSwitch.className = 'switch-to-game';
             
-            btnEditor.className = 'nav-btn editor-btn active';
+            btnEditor.className = 'nav-btn editor-btn active-editor';
             btnGame.className = 'nav-btn game-btn';
         }
         
@@ -371,15 +410,26 @@
             currentMode = 'game';
             gameFrame.src = 'tank_1.html';
             
-            statusText.textContent = 'Игра';
+            statusText.textContent = 'ИГРА';
             statusDot.className = 'status-dot game';
+            statusBadge.className = 'status-badge game-mode';
             infoText.textContent = '🎮 Управление: WASD — движение | Стрелки — наклон башни | Пробел — выстрел';
-            modeIndicator.textContent = '🎮 ИГРА';
+            modeIndicator.textContent = '🎮 ИГРА НА ТАНКЕ';
             modeIndicator.className = 'game-mode';
             modeLabel.textContent = '| Игра';
+            bigSwitch.textContent = '🛠️ ПЕРЕЙТИ В РЕДАКТОР';
+            bigSwitch.className = 'switch-to-editor';
             
-            btnGame.className = 'nav-btn game-btn active';
+            btnGame.className = 'nav-btn game-btn active-game';
             btnEditor.className = 'nav-btn editor-btn';
+        }
+        
+        function toggleMode() {
+            if (currentMode === 'editor') {
+                switchToGame();
+            } else {
+                switchToEditor();
+            }
         }
         
         function reloadFrame() {
@@ -434,7 +484,6 @@
         
         toggleBtn.style.display = 'block';
         
-        // Полноэкранный режим
         document.addEventListener('fullscreenchange', () => {
             const isFull = document.fullscreenElement;
             const btns = document.querySelectorAll('.nav-btn');
@@ -445,7 +494,6 @@
             });
         });
         
-        // Обработка ошибки
         gameFrame.addEventListener('error', () => {
             document.getElementById('gameContainer').innerHTML = `
                 <div style="display: flex; justify-content: center; align-items: center; height: 100vh; 
@@ -465,7 +513,6 @@
             `;
         });
         
-        // Горячие клавиши
         document.addEventListener('keydown', (e) => {
             if (e.key === 'F5') {
                 e.preventDefault();
@@ -479,12 +526,17 @@
                 e.preventDefault();
                 switchToGame();
             }
+            if (e.key === 'Tab') {
+                e.preventDefault();
+                toggleMode();
+            }
         });
         
         console.log('✅ index.html загружен!');
-        console.log('🛠️ Редактор: editor.html');
+        console.log('🛠️ Редактор: editor.html (открыт по умолчанию)');
         console.log('🎮 Игра: tank_1.html');
-        console.log('⌨️ Ctrl+1 - редактор, Ctrl+2 - игра, F5 - обновить');
+        console.log('⌨️ Ctrl+1 - редактор, Ctrl+2 - игра, Tab - переключение');
+        console.log('📁 Убедитесь, что оба файла находятся в той же папке');
     </script>
 </body>
 </html>
